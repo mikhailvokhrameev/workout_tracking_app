@@ -1,0 +1,720 @@
+# Color and Style Definitions
+#:set bg_color (1, 1, 1, 1)                  # Pure White for the main background
+#:set surface_color (0.95, 0.95, 0.95, 1)      # Very Light Grey for Cards
+#:set primary_color (0.42, 0.42, 0.42, 1)      # Dark grey for primary text/icons
+#:set text_color (0.17, 0.24, 0.31, 1)         # Very dark grey for body text
+#:set text_secondary_color (0.5, 0.55, 0.55, 1) # Lighter grey for secondary text
+#:set success_color (0.15, 0.68, 0.38, 1)      # Green
+#:set danger_color (0.91, 0.3, 0.24, 1)        # Red
+#:set border_color (0.88, 0.88, 0.88, 1)       # Light border color
+
+<StyledLabel@Label>:
+    color: text_color
+    font_size: '15sp'
+    font_name: 'Montserrat' 
+
+<H1@StyledLabel>:
+    font_size: '24sp'
+    bold: True
+    color: primary_color
+
+<H2@StyledLabel>:
+    font_size: '20sp'
+    bold: True
+    color: primary_color
+
+<H3@StyledLabel>:
+    font_size: '18sp'
+    bold: True
+    color: primary_color
+
+<SecondaryLabel@StyledLabel>:
+    color: text_secondary_color
+
+<StyledButton@Button>:
+    background_color: primary_color
+    color: (1, 1, 1, 1)
+    font_size: '14sp'
+    size_hint_y: None
+    height: '48dp'
+    background_normal: '' 
+    font_name: 'Montserrat'
+    bold: True
+    canvas.before:
+        Color:
+            rgba: self.background_color
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [8,]
+
+<SuccessButton@StyledButton>:
+    background_color: success_color
+
+<DangerButton@StyledButton>:
+    background_color: danger_color
+
+<SecondaryButton@StyledButton>:
+    background_color: (0.58, 0.65, 0.65, 1) #e5e5e5ff
+
+<SmallButton@StyledButton>:
+    size_hint: (None, None)
+    size: ('80dp', '36dp')
+    font_size: '12sp'
+
+<StyledTextInput@TextInput>:
+    background_color: bg_color
+    foreground_color: text_color
+    font_size: '15sp'
+    padding: [12, 12, 12, 12]
+    size_hint_y: None
+    height: '48dp'
+    multiline: False
+    cursor_color: primary_color
+    background_active: '' 
+    background_normal: ''
+    canvas.before:
+        Color:
+            rgba: self.background_color
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [8,]
+        Color:
+            rgba: border_color if not self.focus else primary_color
+        Line:
+            rounded_rectangle: (self.pos[0], self.pos[1], self.size[0], self.size[1], 8)
+            width: 1.2
+
+<StyledSpinner@Spinner>:
+    background_color: bg_color
+    color: text_color
+    font_size: '15sp'
+    size_hint_y: None
+    height: '48dp'
+    background_normal: ''
+    background_down: ''
+    option_cls: 'SpinnerOption'
+    canvas.before:
+        Color:
+            rgba: self.background_color
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [8,]
+        Color:
+            rgba: border_color
+        Line:
+            rounded_rectangle: (self.pos[0], self.pos[1], self.size[0], self.size[1], 8)
+
+<SpinnerOption>:
+    background_color: bg_color
+    height: '44dp'
+
+<TabbedPanelItem>:
+    font_name: 'Montserrat'
+    font_size: '13sp'
+    color: text_color
+    background_normal: '' # This is crucial to allow background_color to work
+    background_down: ''   # This is for the pressed/active state
+
+    # This line sets the background: pure white if active, light grey if not.
+    background_color: bg_color if self.state == 'down' else surface_color
+
+<Card@BoxLayout>:
+    orientation: 'vertical'
+    padding: '20dp'
+    spacing: '15dp'
+    size_hint_y: None
+    height: self.minimum_height
+    canvas.before:
+        Color:
+            rgba: surface_color
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [12,]
+
+<Placeholder@BoxLayout>:
+    orientation: 'vertical'
+    size_hint_y: None
+    height: self.minimum_height
+    padding: '40dp', '20dp'
+    spacing: '20dp'
+    opacity: 0 # Hidden by default
+    Image:
+        source: 'Images/empty.png'
+        size_hint_y: None
+        height: '80dp'
+    SecondaryLabel:
+        text: 'Здесь пока ничего нет'
+        italic: True
+        halign: 'center'
+
+<FormGroup>:
+    orientation: 'vertical'
+    spacing: '8dp'
+    size_hint_y: None
+    height: self.minimum_height
+    SecondaryLabel:
+        text: root.label_text
+        size_hint_y: None
+        height: self.texture_size[1]
+    # Children widgets (TextInput, Spinner) are added in KV rules
+
+<ProgramCard>:
+    # Add the on_release event here
+    # We use 'app.root' which is the direct, guaranteed way to access MainScreen.
+    on_release: app.root.select_program(root.program_id)
+    # Set background to transparent so our custom canvas is visible
+    background_color: (0,0,0,0)
+    background_normal: ''
+    orientation: 'vertical'
+    padding: '15dp'
+    spacing: '10dp'
+    size_hint_y: None
+    height: self.minimum_height
+    canvas.before:
+        Color:
+            rgba: surface_color
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [12,]
+        Color:
+            rgba: primary_color if root.is_active else (0,0,0,0)
+        Line:
+            rounded_rectangle: (self.pos[0], self.pos[1], self.size[0], self.size[1], 12)
+            width: 2
+    BoxLayout:
+        size_hint_y: None
+        height: '30dp'
+        Label:
+            text: root.program_name
+            font_size: '16sp'
+            bold: True
+            color: text_color
+            halign: 'left'
+            valign: 'middle'
+            text_size: self.size
+        SmallButton:
+            text: 'x'
+            background_color: danger_color
+            size: ('30dp', '30dp')
+            on_release: root.main_screen.delete_program(root.program_id)
+    FormGroup:
+        label_text: "Тип прогрессии:"
+        BoxLayout:
+            padding: '8dp'
+            size_hint_y: None
+            height: '40dp'
+            canvas.before:
+                Color:
+                    rgba: bg_color
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [8,]
+            StyledLabel:
+                text: {'linear': 'Линейная (5x5)', 'double': 'Двойная (3x6-10)', 'rep_range': 'Диапазон (3x8-12)'}[root.progression_type]
+    Button:
+        background_color: (0,0,0,0)
+        on_release: root.main_screen.select_program(root.program_id)
+
+<ExerciseItem>:
+    size_hint_y: None
+    height: '48dp'
+    padding: '12dp'
+    canvas.before:
+        Color:
+            rgba: bg_color
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [8,]
+    StyledLabel:
+        text: root.exercise_name
+    SmallButton:
+        text: 'x'
+        background_color: danger_color
+        size: ('30dp', '30dp')
+        on_release: root.main_screen.delete_exercise(root.exercise_id)
+
+<ExerciseWorkoutCard>:
+    orientation: 'vertical'
+    padding: '15dp'
+    spacing: '10dp'
+    size_hint_y: None
+    height: self.minimum_height
+    canvas.before:
+        Color:
+            rgba: surface_color
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [12,]
+    BoxLayout:
+        size_hint_y: None
+        height: '30dp'
+        H3:
+            text: root.exercise_name
+            halign: 'left'
+            valign: 'middle'
+            text_size: self.size
+    BoxLayout: # Target Info
+        padding: '10dp'
+        size_hint_y: None
+        height: self.minimum_height
+        canvas.before:
+            Color:
+                rgba: 0.2, 0.6, 0.85, 0.1
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [6,]
+        StyledLabel:
+            text: root.target_info
+            markup: True
+            size_hint_y: None
+            height: self.texture_size[1]
+    BoxLayout: # Last Workout
+        padding: '10dp'
+        size_hint_y: None
+        height: self.minimum_height
+        canvas.before:
+            Color:
+                rgba: bg_color
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [6,]
+        StyledLabel:
+            text: root.last_workout_info
+            markup: True
+            size_hint_y: None
+            height: self.texture_size[1]
+    
+    BoxLayout:
+        id: new_sets_container
+        orientation: 'vertical'
+        spacing: '10dp'
+        size_hint_y: None
+        height: self.minimum_height
+
+    SecondaryButton:
+        text: "Добавить подход"
+        size_hint_x: 0.5
+        pos_hint: {'center_x': 0.5}
+        height: '40dp'
+        on_release: root.add_set_row()
+
+<NewSetRow>:
+    size_hint_y: None
+    height: '48dp'
+    spacing: '10dp'
+    StyledTextInput:
+        id: weight_input
+        hint_text: "Вес (кг)"
+        input_filter: 'float'
+        text: root.weight
+    StyledTextInput:
+        id: reps_input
+        hint_text: "Повторения"
+        input_filter: 'int'
+        text: root.reps
+    SmallButton:
+        text: 'x'
+        background_color: danger_color
+        size: ('40dp', '40dp')
+        on_release: root.card_ref.remove_set_row(root)
+
+<HistorySessionCard>:
+    size_hint_y: None
+    height: self.minimum_height
+    orientation: 'vertical'
+    padding: '15dp'
+    spacing: '10dp'
+    canvas.before:
+        Color:
+            rgba: surface_color
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [12,]
+        Color:
+            rgba: primary_color
+        Line:
+            points: [self.x + 4, self.y, self.x + 4, self.y + self.height]
+            width: 2
+    BoxLayout:
+        size_hint_y: None
+        height: '30dp'
+        H3:
+            # --- FIX: Use .get() to prevent crashing on bad data ---
+            text: "{} - [b]{}[/b]".format(root.session.get('date', 'No Date'), root.session.get('programName', 'Unknown Program'))
+            markup: True
+        SmallButton:
+            text: "x"
+            background_color: danger_color
+            size: ('30dp', '30dp')
+            on_release: root.main_screen.delete_history_session(root.session.get('id'))
+    BoxLayout:
+        id: history_items_container
+        orientation: 'vertical'
+        spacing: '5dp'
+        size_hint_y: None
+        height: self.minimum_height
+
+<HistoryItemLabel>:
+    size_hint_y: None
+    height: self.minimum_height
+    padding: '5dp', 0
+    canvas.after:
+        Color:
+            rgba: border_color
+        Line:
+            points: [self.x, self.y, self.x + self.width, self.y]
+    StyledLabel:
+        text: root.text
+        markup: True
+        size_hint_y: None
+        height: self.texture_size[1]
+
+<ResetConfirmationModal>:
+    size_hint: 0.9, None
+    height: '250dp'
+    auto_dismiss: False # User must choose an option
+    BoxLayout:
+        orientation: 'vertical'
+        padding: '25dp'
+        spacing: '15dp'
+        canvas.before:
+            Color:
+                rgba: surface_color
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [12,]
+        H3:
+            text: "Вы уверены?"
+        StyledLabel:
+            text: "Это действие удалит все ваши программы и историю тренировок без возможности восстановления."
+        BoxLayout:
+            spacing: '10dp'
+            size_hint_y: None
+            height: '48dp'
+            SecondaryButton:
+                text: "Нет, отмена"
+                on_release: root.dismiss()
+            DangerButton:
+                text: "Да, удалить"
+                on_release:
+                    app.root.execute_reset_all_data()
+                    root.dismiss()
+
+<SummaryModal>:
+    # We make it a bit larger to better fit the content and button
+    size_hint: 0.8, 0.5
+    auto_dismiss: False # The user must explicitly close it
+
+    # Use RelativeLayout to allow positioning the button in a corner
+    RelativeLayout:
+        
+        # This is your original content layout, it will be in the background
+        BoxLayout:
+            padding: '25dp'
+            spacing: '15dp'
+            canvas.before:
+                Color:
+                    rgba: surface_color
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [12,]
+            ScrollView:
+                StyledLabel:
+                    id: summary_content
+                    size_hint_y: None
+                    height: self.texture_size[1]
+                    markup: True
+                    padding: '10dp', '10dp'
+                    halign: 'left'
+                    valign: 'top'
+                    text_size: self.width, None
+
+        # --- THIS IS THE NEW BUTTON ---
+        # It's a sibling to the BoxLayout, allowing it to float on top.
+        SmallButton:
+            text: 'x'
+            background_color: danger_color
+            size_hint: None, None # Disable size hinting for precise size and pos
+            size: ('30dp', '30dp')
+            
+            # Position the button in the top-right corner with a small margin
+            pos_hint: {'right': 0.99, 'top': 0.99}
+            
+            # The logic to close the modal is 'root.dismiss()'
+            on_release: root.dismiss()
+
+<StagnationModal>:
+    size_hint: 0.9, 0.8
+    BoxLayout:
+        padding: '25dp'
+        spacing: '15dp'
+        orientation: 'vertical'
+        canvas.before:
+            Color:
+                rgba: surface_color
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [12,]
+        Image:
+            source: 'Images/tomplatz.png'
+            size_hint_y: None
+            height: '150dp'
+        H2:
+            text: 'Ничего страшного!'
+            size_hint_y: None
+            height: self.texture_size[1]
+        ScrollView:
+            StyledLabel:
+                size_hint_y: None
+                height: self.texture_size[1]
+                text: "Сегодняшние результаты оказались чуть ниже предыдущих. Это абсолютно нормально.\n\n[b]Возможные причины:[/b]\n- Недостаточный сон\n- Нехватка калорий\n- Накопленный стресс\n\n[b]Главное — не сдаваться![/b]"
+                markup: True
+
+<NewProgramModal>:
+    size_hint: 0.9, None
+    height: '300dp'
+    BoxLayout:
+        orientation: 'vertical'
+        padding: '25dp'
+        spacing: '15dp'
+        canvas.before:
+            Color:
+                rgba: surface_color
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [12,]
+        H3:
+            text: "Новая программа"
+            size_hint_y: None
+            height: self.texture_size[1]
+        FormGroup:
+            label_text: "Название программы:"
+            StyledTextInput:
+                id: new_program_name_input
+                hint_text: "Например, Тренировка А"
+        FormGroup:
+            label_text: "Тип прогрессии:"
+            StyledSpinner:
+                id: new_progression_type_spinner
+                text: 'Двойная (3x6-10)'
+                values: ['Линейная (5x5)', 'Двойная (3x6-10)', 'Диапазон (3x8-12)']
+        BoxLayout:
+            spacing: '10dp'
+            size_hint_y: None
+            height: '48dp'
+            SecondaryButton:
+                text: "Отмена"
+                on_release: root.dismiss()
+            SuccessButton:
+                text: "Создать"
+                on_release:
+                    # Call the main logic, then dismiss the popup
+                    app.root.add_new_program(new_program_name_input.text, new_progression_type_spinner.text)
+                    root.dismiss()
+
+# --- Main Application Screen ---
+# THIS IS THE MOST IMPORTANT PART.
+# The <MainScreen> rule must have NO indentation.
+# Everything that defines its layout must be indented underneath it.
+
+<MainScreen>:
+    orientation: 'vertical'
+    canvas.before:
+        Color:
+            rgba: bg_color
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    
+    BoxLayout: # Header
+        orientation: 'vertical'
+        size_hint_y: None
+        height: self.minimum_height
+        padding: '10dp'
+        spacing: '5dp'
+        H1:
+            text: 'Ассистент Перегрузки'
+            size_hint_y: None
+            height: self.texture_size[1]
+        SecondaryLabel:
+            text: 'Yeah Buddy Lightweight Baby!'
+            size_hint_y: None
+            height: self.texture_size[1]
+
+    TabbedPanel:
+        id: tabs
+        do_default_tab: False
+        tab_pos: 'top_mid'
+        tab_width: root.width / 4
+        background_color: bg_color
+        # These two lines are the key to the automatic startup rendering
+        on_current_tab: root.handle_tab_switch(self.current_tab)
+        default_tab: workout_tab
+        
+        TabbedPanelItem:
+            text: 'Тренировка'
+            id: workout_tab
+            ScrollView:
+                canvas.before:
+                    Color:
+                        rgba: bg_color
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+                bar_width: '10dp'
+                GridLayout:
+                    cols: 1
+                    spacing: '15dp'
+                    padding: '15dp'
+                    size_hint_y: None
+                    height: self.minimum_height
+                    BoxLayout:
+                        id: today_workout_container
+                        orientation: 'vertical'
+                        spacing: '15dp'
+                        size_hint_y: None
+                        height: self.minimum_height
+                    Placeholder:
+                        id: workout_placeholder
+                    BoxLayout:
+                        spacing: '15dp'
+                        size_hint_y: None
+                        height: '48dp'
+                        SuccessButton:
+                            id: save_workout_btn
+                            text: 'Завершить'
+                            on_release: root.save_workout()
+                        
+        TabbedPanelItem:
+            text: 'Программы'
+            ScrollView:
+                canvas.before:
+                    Color:
+                        rgba: bg_color
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+                bar_width: '10dp'
+                GridLayout:
+                    cols: 1
+                    spacing: '15dp'
+                    padding: '15dp'
+                    size_hint_y: None
+                    height: self.minimum_height
+                    Card:
+                        H3:
+                            text: "Ваши программы"
+                        GridLayout:
+                            id: program_list
+                            cols: 1
+                            spacing: '10dp'
+                            size_hint_y: None
+                            height: self.minimum_height
+                        SecondaryLabel:
+                            id: program_list_placeholder
+                            text: "У вас пока нет программ."
+                        SecondaryButton:
+                            text: "Создать новую программу"
+                            # --- ADD THIS LINE ---
+                            on_release: root.show_new_program_dialog()
+                    Card:
+                        id: exercises_section
+                        opacity: 0
+                        height: 0
+                        H3:
+                            id: active_program_name
+                            text: 'Упражнения в программе'
+                        GridLayout:
+                            id: exercise_list
+                            cols: 1
+                            spacing: '10dp'
+                            size_hint_y: None
+                            height: self.minimum_height
+                        SecondaryLabel:
+                            id: exercise_placeholder
+                            text: "В этой программе пока нет упражнений."
+                            opacity: 0
+                        FormGroup:
+                            label_text: "Добавить новое упражнение:"
+                            StyledTextInput:
+                                id: new_exercise_name
+                                hint_text: "Например, Жим лежа"
+                        StyledButton:
+                            text: "Добавить"
+                            on_release: root.add_exercise_to_program()
+                    Card:
+                        orientation: 'vertical'
+                        spacing: '10dp'
+                        H3:
+                            text: "Удаление данных"
+                        DangerButton:
+                            text: "Сбросить все данные"
+                            on_release: root.confirm_reset_all_data()
+
+        TabbedPanelItem:
+            id: history_tab
+            text: 'История'
+            ScrollView:
+                canvas.before:
+                    Color:
+                        rgba: bg_color
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+                bar_width: '10dp'
+                GridLayout:
+                    cols: 1
+                    spacing: '15dp'
+                    padding: '15dp'
+                    size_hint_y: None
+                    height: self.minimum_height
+                    GridLayout:
+                        id: full_history_container
+                        cols: 1
+                        spacing: '15dp'
+                        size_hint_y: None
+                        height: self.minimum_height
+                    Placeholder:
+                        id: history_placeholder
+
+        TabbedPanelItem:
+            text: 'Графики'
+            ScrollView:
+                canvas.before:
+                    Color:
+                        rgba: bg_color
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+                SecondaryLabel:
+                    text: 'В разработке...'
+                
+                
+            
+
+    BoxLayout: # Footer
+        size_hint_y: None
+        height: '40dp'
+        padding: '10dp'
+        canvas.before:
+            Color:
+                rgba: border_color
+            Line:
+                points: [self.x, self.y + self.height, self.x + self.width, self.y + self.height]
+        SecondaryLabel:
+            text: 'Разработал студент МГТУ им. Н. Э. Баумана, Вохрамеев Михаил'
