@@ -1,0 +1,37 @@
+<HistoryScreen>:
+    MDBoxLayout:
+        orientation: 'vertical'
+
+        Placeholder:
+            id: history_placeholder
+
+        ScrollView:
+            id: history_scroll_view
+
+            MDList:
+                id: full_history_container
+                padding: "10dp"
+                spacing: "10dp"
+
+<HistorySessionCard>:
+    orientation: 'vertical'
+    adaptive_height: True
+    padding: "10dp"
+    spacing: "10dp"
+    md_bg_color: app.theme_cls.bg_light
+
+    MDLabel:
+        text: root.session.get('date', 'Unknown Date')
+        font_style: 'Body'
+        adaptive_height: True
+    
+    MDBoxLayout:
+        id: history_items_container
+        orientation: 'vertical'
+        adaptive_height: True
+        spacing: '5dp'
+    
+    MDButton:
+        style: "elevated"
+        text: "Удалить запись"
+        on_press: root.screen.delete_history_session(root.session.get('id'))

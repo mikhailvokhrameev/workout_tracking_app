@@ -1,0 +1,188 @@
+<NewProgramDialog>:
+    orientation: 'vertical'
+    spacing: "12dp"
+    padding: "12dp"
+    size_hint_y: None
+    height: self.minimum_height
+
+    MDDialogHeadlineText:
+        text: "Новая программа"
+        font_style: 'Body'
+
+    MDDialogSupportingText:
+        
+        MDBoxLayout:
+            orientation: "vertical"
+            spacing: "15dp"
+            padding: "15dp"
+            #adaptive_height: True
+
+            # 2. ПОЯСНЯЮЩИЙ ТЕКСТ ПОД ПОЛЕМ ВВОДА
+            MDLabel:
+                text: "Введите название программы, например, 'День ног' или 'Верх тела'."
+                font_style: 'Body'
+                theme_text_color: "Secondary"
+                adaptive_size: True
+
+            # 1. ПОЛЕ ВВОДА НАЗВАНИЯ ПРОГРАММЫ
+            MDTextField:
+                id: new_program_name_input
+                hint_text: "Название программы"
+                mode: "outlined"
+                adaptive_size: True
+
+            # 3. КНОПКА ВЫБОРА ТИПА ПРОГРЕССИИ
+            MDButton:
+                id: progression_type_button
+                style: "text"
+                on_release: root.open_menu(self)
+
+                MDButtonText:
+                    id: progression_type_button_text
+                    # Текст будет установлен из метода on_open в Python
+    MDDialogButtonContainer:
+        MDButton:
+            style: "text"
+            on_release: root.dismiss()
+
+            MDButtonText:
+                text: "ОТМЕНА"
+        
+        MDButton:
+            style: "text"
+            on_release: root.create_program()
+
+            MDButtonText:
+                text: "СОЗДАТЬ"
+
+<ProgramsScreen>:
+    # Основной контейнер экрана
+    MDBoxLayout:
+        orientation: 'vertical'
+        padding: "15dp"
+        spacing: "15dp"
+
+        MDCard:
+            style: "elevated"
+            padding: "20dp"
+            spacing: "15dp"
+            orientation: 'vertical'
+            adaptive_height: True
+
+            MDLabel:
+                text: "Ваши программы"
+                font_style: 'Body'
+                adaptive_height: True
+
+            ScrollView:
+                id: programs_scroll_view
+                # Задаем высоту, чтобы карточка не сжималась, если список пуст
+                height: "200dp" 
+                size_hint_y: None
+                    
+                MDList:
+                    id: program_list
+                    spacing: '10dp'
+                    adaptive_height: True
+        MDButton:
+            style: "filled"
+            pos_hint: {'center_x': 0.5}
+            adaptive_size: True
+            on_release: root.show_new_program_dialog()
+                            
+            MDButtonText:
+                text: "Создать новую программу"
+
+            # секция с упражнениями
+            MDCard:
+                id: exercises_section
+                style: "elevated"
+                orientation: 'vertical'
+                padding: "20dp"
+                spacing: "15dp"
+                adaptive_height: True
+                opacity: 0
+                size_hint_y: None
+                height: 0
+                
+                MDLabel:
+                    id: active_program_name
+                    text: 'Упражнения в программе'
+                    font_style: 'Body'
+                    adaptive_height: True
+
+                MDBoxLayout:
+                    id: exercise_list
+                    orientation: 'vertical'
+                    spacing: '10dp'
+                    adaptive_height: True
+
+                MDBoxLayout:
+                    orientation: 'vertical'
+                    adaptive_height: True
+                    spacing: '8dp'
+                    MDLabel:
+                        text: "Добавить новое упражнение:"
+                        font_style: 'Body'
+                        theme_text_color: "Secondary"
+                        adaptive_height: True
+                    MDTextField:
+                        id: new_exercise_name
+                        hint_text: "Например, Жим лежа"
+                        mode: "outlined"
+                    MDButton:
+                        style: "filled"
+                        pos_hint: {'right': 1}
+                        on_release: root.add_exercise_to_program()
+
+                        MDButtonText:
+                            text: "Добавить"
+
+
+<ProgramCard>:
+    style: "filled"
+    md_bg_color: app.theme_cls.primary_container
+    line_color: app.theme_cls.primary
+    padding: "15dp"
+    spacing: "10dp"
+    adaptive_height: True
+    on_release: root.screen.select_program(root.program_id)
+
+    MDBoxLayout:
+        adaptive_height: True
+        MDIconButton:
+            icon: "delete"
+            theme_icon_color: "Custom"
+            icon_color: app.theme_cls.error
+            on_release: root.screen.delete_program(root.program_id)
+        
+        MDLabel:
+            text: root.program_name
+            font_style: 'Body'
+            adaptive_height: True
+
+    MDLabel:
+        text: {'linear': 'Линейная (5x5)', 'double': 'Двойная (3x6-10)', 'rep_range': 'Диапазон (3x8-12)'}[root.progression_type]
+        font_style: 'Body'
+        theme_text_color: "Secondary"
+        adaptive_height: True
+        padding: [dp(30), 0, 0, 0]
+
+
+<ExerciseItem>:
+    adaptive_height: True
+    spacing: "10dp"
+    padding: "5dp"
+    md_bg_color: app.theme_cls.surfaceColor
+    radius: [8,]
+
+    MDLabel:
+        text: root.exercise_name
+        font_style: 'Body'
+
+    MDIconButton:
+        icon: "trash-can-outline"
+        theme_icon_color: "Custom"
+        #icon_color: app.theme_cls.error
+        on_release: root.screen.delete_exercise(root.exercise_id)
+

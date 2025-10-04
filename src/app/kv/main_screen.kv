@@ -1,0 +1,65 @@
+#:include src/app/kv/history_screen.kv
+#:include src/app/kv/programs_screen.kv
+#:include src/app/kv/components.kv 
+
+
+<BaseMDNavigationItem>:
+    MDNavigationItemIcon:
+        icon: root.icon
+    MDNavigationItemLabel:
+        text: root.text
+
+MDScreen:
+    name: "MainScreen"
+    md_bg_color: app.theme_cls.surfaceColor
+
+    MDBoxLayout:
+        orientation: 'vertical'
+        md_bg_color: self.theme_cls.backgroundColor
+
+        MDScreenManager:
+            id: screen_manager
+
+            MDScreen:
+                name: "workout_screen"
+                
+                MDLabel:
+                    text: 'Содержимое экрана "Тренировка"'
+                    halign: 'center'
+            
+            ProgramsScreen:
+                name: "programs_screen"
+
+            HistoryScreen:
+                name: "history_screen"
+            
+            MDScreen:
+                name: 'graph_screen'
+
+                MDLabel:
+                    text: 'Содержимое экрана "Графики"'
+                    halign: 'center'
+
+        MDNavigationBar:
+            on_switch_tabs: app.on_switch_tabs(*args)
+
+            BaseMDNavigationItem:
+                name: 'workout_screen'
+                text: 'Тренировка'
+                icon: 'weight-lifter'
+                active: True
+
+            BaseMDNavigationItem:
+                name: 'programs_screen'
+                text: 'Программы'
+                icon: 'format-list-bulleted'
+
+            BaseMDNavigationItem:
+                name: 'history_screen'
+                text: 'История'
+                icon: 'history'
+
+            BaseMDNavigationItem:
+                name: 'graph_screen'
+                text: 'Графики'
+                icon: 'graph'

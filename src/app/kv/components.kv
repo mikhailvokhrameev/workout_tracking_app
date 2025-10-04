@@ -1,0 +1,21 @@
+<Placeholder@MDBoxLayout>:
+    orientation: 'vertical'
+    adaptive_height: True
+    padding: '40dp', '20dp'
+    spacing: '20dp'
+    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+    opacity: 0 # По умолчанию скрыт
+    
+    Image:
+        source: 'app/assets/images/empty.png'
+        pos_hint: {'center_x': 0.5}
+        size_hint_y: None
+        height: '80dp'
+        
+    MDLabel:
+        text: 'здесь пока ничего нет'
+        italic: True
+        halign: 'center'
+        theme_text_color: "Secondary"
+
+            
