@@ -3,28 +3,24 @@ from kivymd.app import MDApp
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.dialog import MDDialog
+from kivymd.uix.card import MDCard
 from kivymd.uix.button import MDButton, MDButtonText
 from kivymd.uix.textfield import MDTextField
 from kivymd.uix.menu import MDDropdownMenu
-from kivy.properties import ObjectProperty, StringProperty
+from kivy.properties import ObjectProperty, StringProperty, NumericProperty
 from kivy.clock import Clock
-from kivymd.uix.swiper import MDSwiperItem
-
-class ProgramSwiperItem(MDSwiperItem):
-    program_id = ObjectProperty(None)
-    program_name = StringProperty('')
     
-class ProgramCard(MDBoxLayout):
+class ProgramCard(MDCard):
     screen = ObjectProperty(None)
     program_id = ObjectProperty(None)
     program_name = StringProperty('')
     progression_type = StringProperty('')
-    is_active = ObjectProperty(False)
+    # is_active = ObjectProperty(False)
     
-class ExerciseItem(MDBoxLayout):
-    exercise_id = ObjectProperty(None)
-    exercise_name = StringProperty('')
-    screen = ObjectProperty(None)
+# class ExerciseItem(MDBoxLayout):
+#     exercise_id = ObjectProperty(None)
+#     exercise_name = StringProperty('')
+#     screen = ObjectProperty(None)
 
 class NewProgramDialog(MDDialog):
 
@@ -39,6 +35,10 @@ class NewProgramDialog(MDDialog):
         }
         # по дефолту двойная прогрессиия
         self.selected_prog_type = 'double'
+        
+    def on_open(self):
+        self.ids.progression_type_button_text.text = self.prog_map_display[self.selected_prog_type]
+
     
     def open_menu(self, button):
         """
@@ -77,7 +77,9 @@ class NewProgramDialog(MDDialog):
         if prog_name:
             app = MDApp.get_running_app()
             app.logic.create_new_program(prog_name, self.selected_prog_type)
-            self.screen.render_all()
+            # self.screen.render_all()
+            # self.screen.populate_swiper()
+            Clock.schedule_once(self.screen.populate_program_list)
             self.dismiss()
         
 
@@ -86,92 +88,124 @@ class ProgramsScreen(MDScreen):
     new_program_dialog = None
     
     def on_enter(self, *args):
-        self.render_all()
-        # self.populate_swiper()
+        '''
+        Вызывается при каждом входе на экран
+        '''
+        #self.render_all()
+        self.populate_program_list()
     
-    def render_all(self):
-        """
-        Рендерит лист программ и упражнения для активной программы
-        """
-        self.render_program_list()
-        self.render_exercises_for_active_program()
+    # def render_all(self):
+    #     """
+    #     Рендерит лист программ и упражнения для активной программы
+    #     """
+    #     self.render_program_list()
+    #     self.render_exercises_for_active_program()
+                
+
+    def open_program_detail(self, program_id):
+        '''
+        Переключает на экран деталей программы
+        '''
+        if program_id:
+            # self.manager.current = 'program_detail'
+            # self.manager.get_screen('program_detail').load_program(program_id)
+            app = MDApp.get_running_app()
+            app.logic.app_data['activeProgramId'] = program_id
+            app.logic.save_data()
+            
+            detail_screen = self.manager.get_screen('program_detail')
+            detail_screen.program_id = program_id
+            self.manager.transition.direction = 'left'
+            self.manager.current = 'program_detail'
         
-    def render_program_list(self):
+    def populate_program_list(self, *args):
         """
-        Динамически создает ProgramCard виджеты
+        Заполняет MDList карточками программ
         """
-        app = MDApp.get_running_app()
         container = self.ids.program_list
         container.clear_widgets()
         
-        active_id = app.logic.app_data.get('activeProgramId')
-        programs = app.logic.app_data.get('workoutPrograms', [])
+        app = MDApp.get_running_app()
+        programs = app.logic.app_data.get('programs', [])
+        
+        print(f"Найдено программ в данных: {len(programs)}")
+        
+        # active_id = app.logic.app_data.get('activeProgramId')
         
         if programs:
             for program in programs:
                 card = ProgramCard(
+                    screen=self,
                     program_id=program['id'],
                     program_name=program['name'],
-                    progression_type=program['progressionType'],
-                    is_active=(program['id'] == active_id),
-                    screen=self
+                    progression_type=program['progressionType']
+                    # is_active=(program['id'] == active_id),
                 )
                 container.add_widget(card)
                 
-    def select_program(self, program_id):
-        app = MDApp.get_running_app()
-        if app.logic.app_data.get('activeProgramId') != program_id:
-            app.logic.select_program(program_id)
-            self.render_all()
-            #app.root.get_screen('workout').render_todays_workout()
+        print(f"Количество виджетов в program_list: {len(container.children)}")
+        if container.children:
+            print("Виджеты в списке (обратный порядок):")
+            for i, widget in enumerate(container.children):
+                # Выводим информацию о каждой карточке
+                print(f"  {i+1}: {widget} с именем '{widget.program_name}'")
+        else:
+            print("Список program_list пуст.")
+                
+    # def select_program(self, program_id):
+    #     app = MDApp.get_running_app()
+    #     if app.logic.app_data.get('activeProgramId') != program_id:
+    #         app.logic.select_program(program_id)
+    #         self.render_all()
+    #         #app.root.get_screen('workout').render_todays_workout()
     
     def delete_program(self, program_id):
         app = MDApp.get_running_app()
         if app.logic.delete_program(program_id):
-            self.render_all()
+            self.populate_program_list()
             #app.root.get_screen('workout').render_todays_workout()
 
-    def render_exercises_for_active_program(self):
-        app = MDApp.get_running_app()
-        container = self.ids.exercise_list
-        container.clear_widgets()
+    # def render_exercises_for_active_program(self):
+    #     app = MDApp.get_running_app()
+    #     container = self.ids.exercise_list
+    #     container.clear_widgets()
         
-        active_program = app.logic.get_active_program()
-        if not active_program:
-            self.ids.exercises_section.opacity = 0
-            self.ids.exercises_section.size_hint_y = None
-            self.ids.exercises_section.height = 0
-            return
+    #     active_program = app.logic.get_active_program()
+    #     if not active_program:
+    #         self.ids.exercises_section.opacity = 0
+    #         self.ids.exercises_section.size_hint_y = None
+    #         self.ids.exercises_section.height = 0
+    #         return
 
-        self.ids.exercises_section.opacity = 1
-        self.ids.exercises_section.size_hint_y = None
-        self.ids.exercises_section.height = self.ids.exercises_section.minimum_height
-        self.ids.active_program_name.text = active_program['name']
+    #     self.ids.exercises_section.opacity = 1
+    #     self.ids.exercises_section.size_hint_y = None
+    #     self.ids.exercises_section.height = self.ids.exercises_section.minimum_height
+    #     self.ids.active_program_name.text = active_program['name']
         
-        if active_program.get('exercises'):
-            for ex in active_program['exercises']:
-                item = ExerciseItem(
-                    exercise_id=ex['id'],
-                    exercise_name=ex['name'],
-                    screen=self
-                )
-                container.add_widget(item)
+    #     if active_program.get('exercises'):
+    #         for ex in active_program['exercises']:
+    #             item = ExerciseItem(
+    #                 exercise_id=ex['id'],
+    #                 exercise_name=ex['name'],
+    #                 screen=self
+    #             )
+    #             container.add_widget(item)
 
-    def add_exercise_to_program(self):
-        app = MDApp.get_running_app()
-        name = self.ids.new_exercise_name.text.strip()
-        if name:
-            app.logic.add_exercise_to_program(name)
-            self.ids.new_exercise_name.text = ""
-            self.render_exercises_for_active_program()
-            #app.root.get_screen('workout').render_todays_workout()
+    # def add_exercise_to_program(self):
+    #     app = MDApp.get_running_app()
+    #     name = self.ids.new_exercise_name.text.strip()
+    #     if name:
+    #         app.logic.add_exercise_to_program(name)
+    #         self.ids.new_exercise_name.text = ""
+    #         self.render_exercises_for_active_program()
+    #         #app.root.get_screen('workout').render_todays_workout()
         
 
-    def delete_exercise(self, exercise_id):
-        app = MDApp.get_running_app()
-        app.logic.delete_exercise(exercise_id)
-        self.render_exercises_for_active_program()
-        #app.root.get_screen('workout').render_todays_workout()
+    # def delete_exercise(self, exercise_id):
+    #     app = MDApp.get_running_app()
+    #     app.logic.delete_exercise(exercise_id)
+    #     self.render_exercises_for_active_program()
+    #     #app.root.get_screen('workout').render_todays_workout()
     
     def show_new_program_dialog(self):
         """
@@ -180,4 +214,4 @@ class ProgramsScreen(MDScreen):
         if not self.new_program_dialog:
             self.new_program_dialog = NewProgramDialog(screen=self)
         self.new_program_dialog.open()
-    
+        

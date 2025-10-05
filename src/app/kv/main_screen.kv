@@ -1,11 +1,14 @@
 #:include src/app/kv/history_screen.kv
 #:include src/app/kv/programs_screen.kv
+#:include src/app/kv/workout_screen.kv
+#:include src/app/kv/program_detail_screen.kv
 #:include src/app/kv/components.kv 
 
 
 <BaseMDNavigationItem>:
     MDNavigationItemIcon:
         icon: root.icon
+        # theme_icon_color: "Primary"
     MDNavigationItemLabel:
         text: root.text
 
@@ -20,18 +23,17 @@ MDScreen:
         MDScreenManager:
             id: screen_manager
 
-            MDScreen:
+            WorkoutScreen:
                 name: "workout_screen"
-                
-                MDLabel:
-                    text: 'Содержимое экрана "Тренировка"'
-                    halign: 'center'
             
             ProgramsScreen:
                 name: "programs_screen"
 
             HistoryScreen:
                 name: "history_screen"
+            
+            ProgramDetailScreen:
+                name: 'program_detail'
             
             MDScreen:
                 name: 'graph_screen'
@@ -41,18 +43,19 @@ MDScreen:
                     halign: 'center'
 
         MDNavigationBar:
+            id: nav_bar
             on_switch_tabs: app.on_switch_tabs(*args)
 
             BaseMDNavigationItem:
                 name: 'workout_screen'
                 text: 'Тренировка'
                 icon: 'weight-lifter'
-                active: True
 
             BaseMDNavigationItem:
                 name: 'programs_screen'
                 text: 'Программы'
                 icon: 'format-list-bulleted'
+                active: True
 
             BaseMDNavigationItem:
                 name: 'history_screen'
@@ -62,4 +65,4 @@ MDScreen:
             BaseMDNavigationItem:
                 name: 'graph_screen'
                 text: 'Графики'
-                icon: 'graph'
+                icon: 'chart-line'

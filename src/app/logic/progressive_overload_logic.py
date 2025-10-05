@@ -131,6 +131,9 @@ class ProgressiveOverloadLogic:
             if exercise_id in self.current_workout_state:
                 del self.current_workout_state[exercise_id]
             self.save_data()
+    
+
+
 
     # Workout State & Logic
 
