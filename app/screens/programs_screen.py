@@ -15,12 +15,7 @@ class ProgramCard(MDCard):
     program_id = ObjectProperty(None)
     program_name = StringProperty('')
     progression_type = StringProperty('')
-    # is_active = ObjectProperty(False)
-    
-# class ExerciseItem(MDBoxLayout):
-#     exercise_id = ObjectProperty(None)
-#     exercise_name = StringProperty('')
-#     screen = ObjectProperty(None)
+
 
 class NewProgramDialog(MDDialog):
 
@@ -59,26 +54,19 @@ class NewProgramDialog(MDDialog):
         ).open()
 
     def set_item(self, value, display_text):
-        """
-        This is the callback function for when a menu item is selected.
-        """
         self.selected_prog_type = value
         # self.content_cls.ids.progression_type_button.text = display_text
         self.ids.progression_type_button_text.text = display_text
-        # The MDDropdownMenu automatically closes itself, so no need to call dismiss() here.
     
     def create_program(self, *args):
         """
         Создает программу с названием из text field и выбранным типом прогрессии
         """
-        # prog_name = self.content_cls.ids.new_program_name_input.text.strip()
         prog_name = self.ids.new_program_name_input.text.strip()
         
         if prog_name:
             app = MDApp.get_running_app()
             app.logic.create_new_program(prog_name, self.selected_prog_type)
-            # self.screen.render_all()
-            # self.screen.populate_swiper()
             Clock.schedule_once(self.screen.populate_program_list)
             self.dismiss()
         
@@ -107,8 +95,6 @@ class ProgramsScreen(MDScreen):
         Переключает на экран деталей программы
         '''
         if program_id:
-            # self.manager.current = 'program_detail'
-            # self.manager.get_screen('program_detail').load_program(program_id)
             app = MDApp.get_running_app()
             app.logic.app_data['activeProgramId'] = program_id
             app.logic.save_data()
@@ -139,18 +125,8 @@ class ProgramsScreen(MDScreen):
                     program_id=program['id'],
                     program_name=program['name'],
                     progression_type=program['progressionType']
-                    # is_active=(program['id'] == active_id),
                 )
                 container.add_widget(card)
-                
-        print(f"Количество виджетов в program_list: {len(container.children)}")
-        if container.children:
-            print("Виджеты в списке (обратный порядок):")
-            for i, widget in enumerate(container.children):
-                # Выводим информацию о каждой карточке
-                print(f"  {i+1}: {widget} с именем '{widget.program_name}'")
-        else:
-            print("Список program_list пуст.")
                 
     # def select_program(self, program_id):
     #     app = MDApp.get_running_app()

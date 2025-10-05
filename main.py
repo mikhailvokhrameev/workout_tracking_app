@@ -11,8 +11,8 @@ from app.screens.program_detail_screen import ProgramDetailScreen, ExerciseItem
 from app.screens.main_screen import MainScreen
 from app.screens.history_screen import HistoryScreen
 from app.screens.workout_screen import WorkoutScreen
-from components import BaseMDNavigationItem
-from components import ProgramsPlaceholder
+from app.logic.components import BaseMDNavigationItem
+from app.logic.components import ProgramsPlaceholder
 from kivy.clock import Clock
 
 Window.size = (400, 750)
@@ -24,7 +24,7 @@ class MainApp(MDApp):
         self.theme_cls.theme_style = "Light"
         # цвет для кнопок, активных элементов и т.д
         self.theme_cls.primary_palette = "Blue"
-        return Builder.load_file('src/app/kv/main_screen.kv')
+        return Builder.load_file('app/kv/main_screen.kv')
     
     def on_start(self):
         """
