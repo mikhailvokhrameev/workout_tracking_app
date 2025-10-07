@@ -1,16 +1,12 @@
 <NewProgramDialog>:
-    # NewProgramDialog является MDBoxLayout, настраиваем его напрямую
     orientation: 'vertical'
-    style: "elevated"  # Применяем стиль карточки
+    style: "elevated"
     padding: "10dp"
     spacing: "20dp"
-    
-    # Задаем размер и положение
     size_hint: .9, .5
     height: self.minimum_height
     pos_hint: {'center_x': .5, 'center_y': .5}
     
-    # --- Содержимое диалога ---
     MDLabel:
         text: "Новая программа"
         font_style: 'Title'
@@ -46,7 +42,6 @@
         MDButtonText:
             id: progression_type_button_text
             
-    # --- Кнопки действий ---
     MDBoxLayout:
         adaptive_height: True
         padding: [0, "20dp", 0, 0]
@@ -56,18 +51,17 @@
             on_release: root.dismiss()
             
             MDButtonText:
-                text: "ОТМЕНА"
+                text: "отмена"
         
         MDButton:
             style: "text"
             on_release: root.create_program()
             
             MDButtonText:
-                text: "СОЗДАТЬ"
+                text: "создать"
 
 
 <ProgramsScreen>:
-    # Основной контейнер экрана
     MDBoxLayout:
         orientation: 'vertical'
         padding: "15dp"
@@ -80,7 +74,6 @@
             adaptive_height: True
 
         MDScrollView:
-            # md_bg_color: app.theme_cls.primaryColor
             do_scroll_x: False
             MDList:
                 id: program_list
@@ -96,10 +89,7 @@
                 text: "Создать новую программу"  
        
 
-            
-
 <ProgramCard>:
-
     padding: "15dp"
     spacing: "10dp"
     adaptive_height: True

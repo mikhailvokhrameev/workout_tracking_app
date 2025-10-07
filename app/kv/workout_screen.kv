@@ -1,0 +1,93 @@
+<NewSetRow>:
+    adaptive_height: True
+    spacing: "8dp"
+    padding: ("8dp", 0)
+
+    MDTextField:
+        id: weight_input
+        text: root.weight
+        input_filter: "float"
+        MDTextFieldHintText:
+            text: "Вес"
+
+    MDTextField:
+        id: reps_input
+        text: root.reps
+        input_filter: "int"
+        MDTextFieldHintText:
+            text: "Повт."
+
+    MDButton:
+        on_release: root.panel_ref.remove_set_row(root)
+        pos_hint: {"center_y": 0.5}
+        MDButtonIcon:
+            icon: "trash-can-outline"
+
+<ExpansionPanelItem>:
+
+    MDExpansionPanelHeader:
+        MDListItem:
+            ripple_effect: False
+
+            MDListItemHeadlineText:
+                text: root.exercise_name
+
+            MDListItemSupportingText:
+                text: root.target_info
+
+            MDListItemTertiaryText:
+                text: root.last_workout_info
+
+            TrailingPressedIconButton:
+                id: chevron
+                icon: "chevron-right"
+                on_release: app.tap_expansion_chevron(root, self)
+
+    
+    MDExpansionPanelContent:
+        orientation: 'vertical'
+        # padding: "12dp", "12dp", "12dp", "12dp"
+        adaptive_height: True
+
+        MDBoxLayout:
+            id: new_sets_container
+            orientation: 'vertical'
+            adaptive_height: True
+            spacing: "4dp"
+            padding: "8dp"
+            
+        MDButton:
+            on_release: root.add_set_row()
+            pos_hint: {'center_x': 0.5}
+            style: "filled"
+
+            MDButtonText:
+                text: "Добавить подход"
+
+
+<WorkoutScreen>:
+    name: 'workout'
+
+    MDBoxLayout:
+        orientation: 'vertical'
+        
+        ScrollView:
+            size_hint_y: 0.9
+            
+            MDList:
+                id: today_workout_container
+                adaptive_height: True
+                padding: "8dp"
+                spacing: "8dp"
+
+        MDButton:
+            id: save_workout_btn
+            on_release: root.save_workout()
+            pos_hint: {'center_x': 0.5}
+            size_hint: (0.8, None)
+            height: "48dp"
+            style: "filled"
+            
+            MDButtonText:
+                text: "Сохранить тренировку"
+

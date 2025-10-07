@@ -2,36 +2,74 @@
     MDBoxLayout:
         orientation: 'vertical'
 
+        # плейсхолдер если история пустая
         Placeholder:
             id: history_placeholder
+            opacity: 0
+            size_hint_y: None
+            height: 0
 
         ScrollView:
             id: history_scroll_view
+            opacity: 1
 
             MDList:
                 id: full_history_container
                 padding: "10dp"
                 spacing: "10dp"
+                size_hint_y: None
+                height: self.minimum_height
+
 
 <HistorySessionCard>:
-    orientation: 'vertical'
-    adaptive_height: True
-    padding: "10dp"
+    padding: "15dp"
     spacing: "10dp"
-    md_bg_color: app.theme_cls.bg_light
+    adaptive_height: True
+    ripple_behavior: True
+    style: "outlined"
 
-    MDLabel:
-        text: root.session.get('date', 'Unknown Date')
-        font_style: 'Body'
-        adaptive_height: True
-    
     MDBoxLayout:
-        id: history_items_container
-        orientation: 'vertical'
         adaptive_height: True
-        spacing: '5dp'
+        orientation: 'horizontal'
+        spacing: "10dp"
+
+        MDBoxLayout:
+            orientation: 'vertical'
+            adaptive_height: True
+            spacing: "5dp"
+            size_hint_x: 1
+
+            MDLabel:
+                text: root.session.get('date', 'Unknown Date')
+                font_style: 'Body'
+                role: 'large'
+                adaptive_height: True
+
+            MDBoxLayout:
+                id: history_items_container
+                orientation: 'vertical'
+                adaptive_height: True
+                spacing: '5dp'
+                padding: [0, "10dp", 0, 0]
+        
+        MDIconButton:
+            icon: "trash-can-outline"
+            pos_hint: {"center_y": 0.5}
+            on_release: root.screen.delete_history_session(root.session.get('id'))
+
+
+<HistoryExerciseItem>:
+    adaptive_height: True
+    spacing: '10dp'
     
-    MDButton:
-        style: "elevated"
-        text: "Удалить запись"
-        on_press: root.screen.delete_history_session(root.session.get('id'))
+    MDLabel:
+        text: root.exercise_name
+        bold: True
+        adaptive_height: True
+        size_hint_x: 0.6
+    
+    MDLabel:
+        text: root.sets_summary
+        adaptive_height: True
+        halign: 'right'
+        size_hint_x: 0.4

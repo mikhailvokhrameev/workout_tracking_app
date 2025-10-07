@@ -1,6 +1,3 @@
-# app/screens/program_detail_screen.kv
-
-# Верстка для одного элемента списка упражнений
 <ExerciseItem>:
     adaptive_height: True
     spacing: "10dp"
@@ -14,7 +11,7 @@
         icon: "trash-can-outline"
         on_release: root.screen.delete_exercise(root.exercise_id)
 
-# Верстка экрана деталей программы
+
 <ProgramDetailScreen>:
     MDBoxLayout:
         orientation: 'vertical'
@@ -23,8 +20,6 @@
 
         MDTopAppBar:
             type: "small"
-            # size_hint_x: .8
-            # pos_hint: {"center_x": .5, "center_y": .5}
 
             MDTopAppBarLeadingButtonContainer:
 
@@ -37,25 +32,21 @@
                 font_style: "Body"
                 halign: "center"
 
-        # основной контент экрана:
         MDBoxLayout:
             orientation: 'vertical'
             padding: "15dp"
             spacing: "15dp"
 
-            # Заголовок с названием программы
             MDLabel:
                 id: program_name
-                font_style: 'Body' # Сделаем заголовок покрупнее
+                font_style: 'Body'
                 halign: 'center'
                 adaptive_height: True
                 
-            # Список упражнений
             ScrollView:
                 MDList:
                     id: exercise_list
             
-            # Поле для добавления нового упражнения
             MDBoxLayout:
                 adaptive_height: True
                 spacing: '10dp'
@@ -85,58 +76,3 @@
                 on_release: root.start_workout()
                 MDButtonText:
                     text: "Начать тренировку"
-
-
-        # # Заголовок с названием программы
-        # MDLabel:
-        #     id: program_name
-        #     font_style: 'Body'
-        #     halign: 'center'
-        #     adaptive_height: True
-            
-        # # Список упражнений
-        # ScrollView:
-        #     MDList:
-        #         id: exercise_list
-        
-                
-        # # Поле для добавления нового упражнения
-        # MDBoxLayout:
-        #     adaptive_height: True
-        #     spacing: '10dp'
-        #     padding: '10dp'
-
-        #     MDTextField:
-        #         id: new_exercise_name
-        #         hint_text: "Новое упражнение"
-        #         mode: "outlined"
-            
-        #         MDTextFieldHintText:
-        #             text: "название упражнения"
-        #             text_color_normal: "grey"
-            
-        #         MDTextFieldMaxLengthText:
-        #             max_text_length: 30
-                
-        #     MDButton:
-        #         style: "filled"
-        #         on_release: root.add_exercise()
-                
-        #         MDButtonText:
-        #             text: "Добавить"
-                    
-        # MDButton:
-        #     style: "filled"
-        #     pos_hint: {'center_x': 0.5}
-        #     on_release: root.start_workout()
-                
-        #     MDButtonText:
-        #         text: "Начать тренировку"
-                    
-        # MDButton:
-        #     style: "outlined"
-        #     pos_hint: {'center_x': 0.5}
-        #     on_release: root.go_back()
-                
-        #     MDButtonText:
-        #         text: "К программам"
