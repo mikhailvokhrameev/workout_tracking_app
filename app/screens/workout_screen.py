@@ -7,7 +7,14 @@ from kivymd.uix.expansionpanel import MDExpansionPanel
 from kivymd.uix.behaviors import RotateBehavior
 from kivy.uix.behaviors import ButtonBehavior
 from kivymd.uix.list import MDListItemTrailingIcon
-
+from kivymd.uix.dialog import (
+    MDDialog,
+    MDDialogHeadlineText,
+    MDDialogSupportingText,
+    MDDialogButtonContainer,
+)
+from kivy.uix.widget import Widget
+from kivymd.uix.button import MDButton, MDButtonText
 
 class NewSetRow(MDBoxLayout):
     """Виджет для одного сета упражнения"""
@@ -63,6 +70,8 @@ class ExpansionPanelItem(MDExpansionPanel):
 
 
 class WorkoutScreen(MDScreen):
+    dialog = None
+    
     def on_enter(self, *args):
         Clock.schedule_once(self.render_todays_workout)
 
@@ -119,3 +128,41 @@ class WorkoutScreen(MDScreen):
         summary_result = logic.save_workout()
         if summary_result:
             self.manager.current = 'history_screen'
+        
+    def show_save_confirmation_dialog(self):
+        """
+        Диалоговое окно для подтверждения сохранения тренировки
+        """
+        if not self.dialog:
+            self.dialog = MDDialog(
+                MDDialogHeadlineText(
+                    text="Сохранить тренировку?",
+                ),
+                MDDialogSupportingText(
+                    text="Вы уверены, что хотите завершить и сохранить эту тренировку?",
+                ),
+                MDDialogButtonContainer(
+                    Widget(),
+                    MDButton(
+                        MDButtonText(text="Отмена"),
+                        style="text",
+                        on_release=self.close_dialog,
+                    ),
+                    MDButton(
+                        MDButtonText(text="Сохранить"),
+                        style="text",
+                        on_release=self.save_and_close_dialog,
+                    ),
+                    spacing="8dp",
+                ),
+            )
+        self.dialog.open()
+
+    def close_dialog(self, *args):
+        if self.dialog:
+            self.dialog.dismiss()
+
+    def save_and_close_dialog(self, *args):
+        app = MDApp.get_running_app()
+        self.save_workout()
+        self.close_dialog()

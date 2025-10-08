@@ -12,6 +12,7 @@ from app.screens.workout_screen import WorkoutScreen, NewSetRow, TrailingPressed
 from app.screens.graph_screen import GraphScreen
 from app.logic.components import BaseMDNavigationItem
 from app.logic.components import ProgramsPlaceholder
+from app.logic.components import SettingsTopAppBar
 from kivy.clock import Clock
 from kivymd.uix.expansionpanel import MDExpansionPanel
 from app.screens.workout_screen import TrailingPressedIconButton 

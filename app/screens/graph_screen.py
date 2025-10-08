@@ -3,7 +3,7 @@ from kivy.clock import Clock
 from kivy.graphics import Color, Mesh
 from kivy.properties import ObjectProperty, StringProperty, NumericProperty
 from kivy.uix.label import Label
-from kivy_garden.graph import Graph, MeshLinePlot
+from kivy_garden.graph import Graph, MeshLinePlot, LinePlot
 from kivymd.app import MDApp
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.screen import MDScreen
@@ -75,63 +75,23 @@ class GraphScreen(MDScreen):
             ylabel='1ПМ (кг)',
             x_ticks_major=max(1, len(points) // 4),
             y_ticks_major=max(5, round(max(one_rep_maxes) / 5 if one_rep_maxes else 5)),
-            y_grid_label=True, x_grid_label=False, padding=dp(15),
+            y_grid_label=True, x_grid_label=False, padding=dp(10),
             x_grid=True, y_grid=True, xmin=-0.5, xmax=len(points) - 0.5,
             ymin=0, ymax=max(one_rep_maxes) * 1.2 if one_rep_maxes else 10,
-            background_color=(0,0,0,0), border_color=(0.3, 0.3, 0.3, 1),
-            label_options={'color': (0.8, 0.8, 0.8, 1), 'bold': True}
+            background_color=(0, 0, 0, 0), border_color=(0.3, 0.3, 0.3, 1),
+            label_options={'color': app.theme_cls.primaryColor, 'bold': True}
         )
         
         self.ids.selected_point_label.text = ""
         
-        plot = MeshLinePlot(color=plot_color)
-        plot.line_width = dp(2)
+        plot = LinePlot(color=plot_color, line_width=dp(2.5)) 
         
         self._graph.add_plot(plot)
-        self.add_custom_x_labels()
-        self.add_gradient_fill(points, plot_color)
         
         self.ids.graph_container.add_widget(self._graph)
         
         self.animate_plot(plot, points)
-        self._graph.bind(on_touch_down=self.on_graph_touch)
-
-    def add_custom_x_labels(self):
-        dates = self.chart_data['labels']
-        for i, date in enumerate(dates):
-            if i % max(1, len(dates) // 4) == 0:
-                label = Label(text=date, font_size='10sp', color=(0.8, 0.8, 0.8, 1))
-                self._graph.add_widget(label)
-                def update_pos(*_, index=i, lbl=label):
-                    if self._graph and self._graph.parent:
-                        pos_x, _ = self._graph.to_widget(index, 0)
-                        lbl.pos = (pos_x - lbl.width / 2, self._graph.y + dp(2))
-                self._graph.bind(pos=update_pos, size=update_pos)
-                Clock.schedule_once(update_pos)
-    
-    def add_gradient_fill(self, points, color):
-        if len(points) < 2: return
-        with self._graph.canvas.before:
-            Color(*color[:3], 0.3)
-            self._gradient_mesh = Mesh(vertices=[], indices=[], mode='triangle_fan')
-        def update_mesh(*_):
-            v = [points[0][0], self._graph.ymin, 0, 0]
-            v.extend(x for p in points for x in (p[0], p[1], 0, 0))
-            v.extend([points[-1][0], self._graph.ymin, 0, 0])
-            self._gradient_mesh.vertices = v
-            self._gradient_mesh.indices = range(len(points) + 2)
-        Clock.schedule_once(update_mesh)
 
     def animate_plot(self, plot, final_points):
         plot.points = [(p[0], self._graph.ymin) for p in final_points]
         Animation(points=final_points, d=1.0, t='out_quad').start(plot)
-
-    def on_graph_touch(self, instance, touch):
-        if self._graph and self._graph.collide_point(*touch.pos):
-            for i, p in enumerate(self._graph.plots[0].points):
-                wx, wy = self._graph.to_widget(p[0], p[1])
-                if abs(touch.x - wx) < dp(20) and abs(touch.y - wy) < dp(20):
-                    date = self.chart_data['labels'][i]
-                    self.ids.selected_point_label.text = f"Date: {date}, 1RM: {p[1]:.2f} kg"
-                    return True
-        return False

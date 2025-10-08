@@ -46,7 +46,6 @@
     
     MDExpansionPanelContent:
         orientation: 'vertical'
-        # padding: "12dp", "12dp", "12dp", "12dp"
         adaptive_height: True
 
         MDBoxLayout:
@@ -82,7 +81,8 @@
 
         MDButton:
             id: save_workout_btn
-            on_release: root.save_workout()
+            # on_release: root.save_workout()
+            on_release: root.show_save_confirmation_dialog()
             pos_hint: {'center_x': 0.5}
             size_hint: (0.8, None)
             height: "48dp"
