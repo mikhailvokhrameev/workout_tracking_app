@@ -9,6 +9,7 @@ from app.screens.program_detail_screen import ProgramDetailScreen, ExerciseItem
 from app.screens.main_screen import MainScreen
 from app.screens.history_screen import HistoryScreen
 from app.screens.workout_screen import WorkoutScreen, NewSetRow, TrailingPressedIconButton, ExpansionPanelItem, WorkoutScreen
+from app.screens.graph_screen import GraphScreen
 from app.logic.components import BaseMDNavigationItem
 from app.logic.components import ProgramsPlaceholder
 from kivy.clock import Clock
@@ -58,7 +59,6 @@ class MainApp(MDApp):
     def tap_expansion_chevron(
         self, panel: MDExpansionPanel, chevron: TrailingPressedIconButton
     ):
-        """Handles expansion panel chevron tap with proper state management"""
         if panel.is_open:
             panel.close()
             panel.set_chevron_up(chevron)

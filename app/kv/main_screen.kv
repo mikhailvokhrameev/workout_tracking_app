@@ -2,7 +2,8 @@
 #:include app/kv/programs_screen.kv
 #:include app/kv/workout_screen.kv
 #:include app/kv/program_detail_screen.kv
-#:include app/kv/components.kv 
+#:include app/kv/components.kv
+#:include app/kv/graph_screen.kv
 
 
 <BaseMDNavigationItem>:
@@ -34,12 +35,9 @@ MDScreen:
             ProgramDetailScreen:
                 name: 'program_detail'
             
-            MDScreen:
+            GraphScreen:
                 name: 'graph_screen'
 
-                MDLabel:
-                    text: 'Содержимое экрана "Графики"'
-                    halign: 'center'
 
         MDNavigationBar:
             id: nav_bar
