@@ -29,6 +29,7 @@ class NewSetRow(MDBoxLayout):
     weight = StringProperty('')
     reps = StringProperty('')
     panel_ref = ObjectProperty(None)
+    set_number = StringProperty('')
     
 class TrailingPressedIconButton(
     ButtonBehavior, RotateBehavior, MDListItemTrailingIcon
@@ -49,6 +50,13 @@ class ExpansionPanelItem(MDExpansionPanel):
         logic = MDApp.get_running_app().logic
         exercise_id = self.exercise_id
 
+        current_sets_count = len(self.ids.new_sets_container.children)
+        if current_sets_count >= 5:
+            print("Достигнуто ограничение в 5 подходов")
+            return
+        
+        set_number = str(current_sets_count + 1)
+        
         if set_data:
             set_id = set_data['id']
             weight = str(set_data['weight'])
@@ -146,29 +154,21 @@ class WorkoutScreen(MDScreen):
             return
 
         saved_exercises_data = []
-        
         for exercise in active_program['exercises']:
             exercise_id = exercise['id']
- 
             workout_sets = app.logic.current_workout_state.get(exercise_id, [])
             
             sets_to_save = []
             for s in workout_sets:
                 if str(s.get('weight', '')).strip() and str(s.get('reps', '')).strip():
                     try:
-                        sets_to_save.append({
-                            **s,
-                            'weight': float(s['weight']),
-                            'reps': int(s['reps'])
-                        })
+                        sets_to_save.append({**s, 'weight': float(s['weight']), 'reps': int(s['reps'])})
                     except (ValueError, TypeError):
                         continue
             
             if sets_to_save:
                 last_history = exercise['history'][-1] if exercise['history'] else None
-                
                 exercise_with_program = {**exercise, 'programId': active_program['id']}
-                
                 saved_exercises_data.append({
                     'exercise': exercise_with_program,
                     'newSets': sets_to_save,
@@ -180,40 +180,36 @@ class WorkoutScreen(MDScreen):
             return
         
         summary_data = app.logic.generate_workout_summary(saved_exercises_data)
-    
         final_text = ""
         if not summary_data['all_goals_achieved']:
             final_text += "Ничего страшного!\n"
             final_text += "Результаты оказались чуть ниже. Это нормально. Главное — не сдаваться!\n\n"
-
         final_text += "[b]Детали прогресса:[/b]\n\n"
         for detail in summary_data['details']:
             final_text += f"{detail['exercise_name']}: {detail['message']}\n"
             final_text += f"{detail['next_target_text']}\n\n"
-       
-        if not self.dialog:
-            content = WorkoutSummaryContent(summary_text=final_text)
-            
-            self.dialog = MDDialog(
-                MDDialogHeadlineText(
-                    text="Сохранить тренировку?",
-                    halign="center"
-                ),
-                MDDialogContentContainer(
-                    content,
-                    orientation='vertical',
-                ),
-                MDDialogButtonContainer(
-                    Widget(),
-                    MDButton(MDButtonText(text="Отмена"), style="text", on_release=self.close_dialog),
-                    MDButton(MDButtonText(text="Сохранить"), style="text", on_release=self.save_and_close_dialog),
-                    spacing="4dp",
-                ),
-                size_hint_x=0.9,
-                auto_dismiss=False,
-            )
 
+        if self.dialog:
+            self.dialog.dismiss()
+            self.dialog = None
+
+        self.dialog = MDDialog(
+            MDDialogHeadlineText(text="Сохранить тренировку?", halign="center"),
+            MDDialogContentContainer(
+                WorkoutSummaryContent(summary_text=final_text),
+                orientation='vertical'
+            ),
+            MDDialogButtonContainer(
+                Widget(),
+                MDButton(MDButtonText(text="Отмена"), style="text", on_release=self.close_dialog),
+                MDButton(MDButtonText(text="Сохранить"), style="text", on_release=self.save_and_close_dialog),
+                spacing="8dp",
+            ),
+            size_hint_x=0.9,
+            auto_dismiss=False,
+        )
         self.dialog.open()
+            
 
     def close_dialog(self, *args):
         if self.dialog:
@@ -242,35 +238,6 @@ class WorkoutScreen(MDScreen):
         summary_result = logic.save_workout()
         if summary_result:
             app.switch_to_screen('history')
-        
-    # def show_save_confirmation_dialog(self):
-    #     """
-    #     Диалоговое окно для подтверждения сохранения тренировки
-    #     """
-    #     if not self.dialog:
-    #         self.dialog = MDDialog(
-    #             MDDialogHeadlineText(
-    #                 text="Сохранить тренировку?",
-    #             ),
-    #             MDDialogSupportingText(
-    #                 text="Вы уверены, что хотите завершить и сохранить эту тренировку?",
-    #             ),
-    #             MDDialogButtonContainer(
-    #                 Widget(),
-    #                 MDButton(
-    #                     MDButtonText(text="Отмена"),
-    #                     style="text",
-    #                     on_release=self.close_dialog,
-    #                 ),
-    #                 MDButton(
-    #                     MDButtonText(text="Сохранить"),
-    #                     style="text",
-    #                     on_release=self.save_and_close_dialog,
-    #                 ),
-    #                 spacing="8dp",
-    #             ),
-    #         )
-    #     self.dialog.open()
 
     def close_dialog(self, *args):
         if self.dialog:

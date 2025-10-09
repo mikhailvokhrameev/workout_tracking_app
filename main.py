@@ -17,6 +17,7 @@ from kivymd.uix.expansionpanel import MDExpansionPanel
 from app.screens.workout_screen import TrailingPressedIconButton 
 from kivy.metrics import dp
 from kivymd.uix.expansionpanel import MDExpansionPanel
+from app.screens.progressive_overload_screen import ProgressiveOverloadScreen
 
 
 Window.size = (400, 750)

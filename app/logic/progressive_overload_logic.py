@@ -190,46 +190,63 @@ class ProgressiveOverloadLogic:
         summary_details = []
 
         for item in saved_exercises_data:
-            exercise = item['exercise']
+            exercise_data = item['exercise']
             new_sets = item['newSets']
             new_working_sets = [s for s in new_sets if s.get('type') == 'normal']
             if not new_working_sets:
                 continue
 
-            active_program = self.get_program_by_id(exercise['programId'])
+            active_program = self.get_program_by_id(exercise_data['programId'])
             if not active_program:
                 active_program = self.get_active_program()
-                
-            progression_type = active_program.get('progressionType', 'double')
 
-            has_previous_target = exercise.get('nextTarget') is not None
+            # --- ИЗМЕНЕНИЕ ЗДЕСЬ: НАХОДИМ ОРИГИНАЛЬНЫЙ ОБЪЕКТ УПРАЖНЕНИЯ ---
+            program_exercise = next((ex for ex in active_program['exercises'] if ex['id'] == exercise_data['id']), None)
+            if not program_exercise:
+                continue
+
+            progression_type = active_program.get('progressionType', 'double')
+            has_previous_target = program_exercise.get('nextTarget') is not None
             
-            detail = {'exercise_name': exercise['name']}
+            detail = {'exercise_name': program_exercise['name']}
 
             if not has_previous_target:
                 detail['status'] = 'success'
                 detail['message'] = "Отличное начало! "
-                exercise['nextTarget'] = self._calculate_next_target(exercise, {'sets': new_working_sets}, progression_type)
-                detail['next_target_text'] = f"Цель на следующую тренировку: {exercise['nextTarget']['text']}"
+                # --- ИЗМЕНЕНИЕ ЗДЕСЬ: ОБНОВЛЯЕМ ОРИГИНАЛ ---
+                program_exercise['nextTarget'] = self._calculate_next_target(program_exercise, {'sets': new_working_sets}, progression_type)
+                detail['next_target_text'] = (
+                    f"Цель на следующую тренировку: {program_exercise['nextTarget']['text']}"
+                    f"{f' с весом {program_exercise['nextTarget']['weight']} кг' if 'weight' in program_exercise['nextTarget'] else ''}"
+                )
             else:
-                is_goal_achieved = self._check_goal_achievement(exercise, new_working_sets, progression_type)
+                is_goal_achieved = self._check_goal_achievement(program_exercise, new_working_sets, progression_type)
                 if is_goal_achieved:
                     detail['status'] = 'success'
                     detail['message'] = "Цель достигнута! "
-                    exercise['nextTarget'] = self._calculate_next_target(exercise, {'sets': new_working_sets}, progression_type)
-                    detail['next_target_text'] = f"Следующая цель: {exercise['nextTarget']['text']}"
+                    # --- ИЗМЕНЕНИЕ ЗДЕСЬ: ОБНОВЛЯЕМ ОРИГИНАЛ ---
+                    program_exercise['nextTarget'] = self._calculate_next_target(program_exercise, {'sets': new_working_sets}, progression_type)
+                    detail['next_target_text'] = (
+                        f"Следующая цель: {program_exercise['nextTarget']['text']}"
+                        f"{f' с весом {program_exercise['nextTarget']['weight']} кг' if 'weight' in program_exercise['nextTarget'] else ''}"
+                    )
                 else:
                     all_goals_achieved = False
                     detail['status'] = 'failure'
                     detail['message'] = "Цель не достигнута. "
-                    detail['next_target_text'] = f"Повторите: {exercise['nextTarget']['text']}"
+                    detail['next_target_text'] = (
+                        f"Повторите: {program_exercise['nextTarget']['text']}"
+                        f"{f' с весом {program_exercise['nextTarget']['weight']} кг' if 'weight' in program_exercise['nextTarget'] else ''}"
+                    )
             summary_details.append(detail)
+        
+        # --- ИЗМЕНЕНИЕ ЗДЕСЬ: СОХРАНЯЕМ ИЗМЕНЕНИЯ В ФАЙЛ ---
+        self.save_data()
             
         return {
             "all_goals_achieved": all_goals_achieved,
             "details": summary_details
         }
-
     
     def _calculate_next_target(self, exercise: Dict, last_workout: Dict, progression_type: str) -> Dict:
         last_working_sets = [s for s in last_workout.get('sets', []) if s.get('type') == 'normal']

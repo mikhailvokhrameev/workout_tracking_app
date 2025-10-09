@@ -15,6 +15,7 @@ class BaseMDNavigationItem(MDNavigationItem):
 
 class SettingsTopAppBar(MDBoxLayout):
     title = StringProperty("Заголовок")
+    screen_manager = ObjectProperty(None)
     show_back_button = BooleanProperty(True)
     _menu = None
     _dialog = None
@@ -74,10 +75,24 @@ class SettingsTopAppBar(MDBoxLayout):
         self._dialog.open()
 
     def _do_reset_all_data(self, *args):
-        print("бум чикабум")
         self._dialog.dismiss()
         app = MDApp.get_running_app()
         if hasattr(app, "reset_all_data"):
-            print("пум пум")
             app.reset_all_data()
-
+    
+    def show_progression_info(self):
+        """Переключает на экран с информацией о прогрессии"""
+        if self.screen_manager.current == "progressive_overload_screen":
+            self.go_back()
+        else:
+            self.last_screen = self.screen_manager.current
+            self.screen_manager.transition.direction = 'right'
+            self.screen_manager.current = "progressive_overload_screen"
+        
+    def go_back(self):
+        if self.screen_manager and hasattr(self, 'last_screen'):
+            self.screen_manager.transition.direction = 'left'
+            self.screen_manager.current = self.last_screen
+        elif self.screen_manager:
+            self.screen_manager.current = 'program_screen'
+        
