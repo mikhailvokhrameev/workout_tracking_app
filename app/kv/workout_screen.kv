@@ -1,3 +1,64 @@
+# <WorkoutSummaryContent>:
+#     orientation: 'vertical'
+#     size_hint: 1, 1
+#     padding: "24dp", "20dp", "24dp", "16dp"
+#     spacing: "16dp"
+
+#     ScrollView:
+#         size_hint: 1, 1
+#         do_scroll_x: False
+#         bar_width: dp(6)
+        
+#         MDLabel:
+#             id: content
+#             text: root.summary_text
+#             font_style: "Body"
+#             role: "large"
+#             markup: True
+#             size_hint_y: None
+#             height: self.texture_size[1]
+#             padding: "4dp", "0dp"
+#             halign: "left"
+#             valign: "top"
+#             text_size: self.width, None
+
+
+# <WorkoutSummaryContent>:
+#     orientation: 'vertical'
+#     size_hint: 1, 1
+#     padding: "24dp", "20dp", "24dp", "16dp"
+#     spacing: "16dp"
+
+#     MDLabel:
+#         id: content
+#         text: root.summary_text
+#         font_style: "Body"
+#         role: "large"
+#         markup: True
+#         size_hint_y: None
+#         height: max(self.texture_size[1], self.parent.height)
+#         padding: "4dp", "0dp"
+#         text_size: self.width, None
+
+<WorkoutSummaryContent>:
+    orientation: 'vertical'
+    size_hint_y: None
+    height: self.minimum_height
+    padding: "24dp", "20dp", "24dp", "16dp"
+    spacing: "16dp"
+
+    MDLabel:
+        id: content
+        text: root.summary_text
+        font_style: "Body"
+        role: "large"
+        markup: True
+        size_hint_y: None
+        height: self.texture_size[1]
+        padding: "4dp", "0dp"
+        text_size: self.width, None
+
+
 <NewSetRow>:
     adaptive_height: True
     spacing: "8dp"
@@ -66,9 +127,16 @@
 
 <WorkoutScreen>:
     name: 'workout'
+    
 
     MDBoxLayout:
         orientation: 'vertical'
+
+        MDLabel:
+            text: "Тренировка"
+            halign: "center"
+            font_style: 'Title'
+            adaptive_height: True
         
         ScrollView:
             size_hint_y: 0.9

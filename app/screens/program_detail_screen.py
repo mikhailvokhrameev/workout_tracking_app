@@ -65,7 +65,7 @@ class ProgramDetailScreen(MDScreen):
         if self.program_id:
             app = MDApp.get_running_app()
             app.logic.select_program(self.program_id)
-            app.switch_to_workout_screen()
+            app.switch_to_screen('workout')
     
     def go_back(self):
         """Возвращает на экран списка программ"""

@@ -11,7 +11,6 @@ from app.screens.history_screen import HistoryScreen
 from app.screens.workout_screen import WorkoutScreen, NewSetRow, TrailingPressedIconButton, ExpansionPanelItem, WorkoutScreen
 from app.screens.graph_screen import GraphScreen
 from app.logic.components import BaseMDNavigationItem
-from app.logic.components import ProgramsPlaceholder
 from app.logic.components import SettingsTopAppBar
 from kivy.clock import Clock
 from kivymd.uix.expansionpanel import MDExpansionPanel
@@ -42,20 +41,20 @@ class MainApp(MDApp):
     ):
         '''Вызывается при нажатии на элемент нижней навигации. Переключает экран в MDScreenManager'''
         self.root.ids.screen_manager.current = item.name
-        
-    def switch_to_workout_screen(self):
+
+    def switch_to_screen(self, screen_name):
         """
-        Программно переключает приложение на экран тренировки.
+        Программно переключает приложение на выбрвнный экран
         """
         # переключаем экран в ScreenManager
-        self.root.ids.screen_manager.current = 'workout_screen'
+        self.root.ids.screen_manager.current = f'{screen_name}_screen'
         
         # активируем вкладку тренировки в навигационной панели
         nav_bar = self.root.ids.nav_bar
         # виджет вкладки по имени
-        workout_item = next((widget for widget in nav_bar.children if hasattr(widget, 'name') and widget.name == 'workout_screen'), None)
-        if workout_item:
-            nav_bar.set_active_item(workout_item)
+        item = next((widget for widget in nav_bar.children if hasattr(widget, 'name') and widget.name == f'{screen_name}_screen'), None)
+        if item:
+            nav_bar.set_active_item(item)
         
     def tap_expansion_chevron(
         self, panel: MDExpansionPanel, chevron: TrailingPressedIconButton
@@ -66,6 +65,18 @@ class MainApp(MDApp):
         else:
             panel.open()
             panel.set_chevron_down(chevron)
+            
+    def reset_all_data(self):
+        self.logic.reset_all_data()
+        self.root.ids.screen_manager.current = "programs_screen"
+        programs_screen = self.root.ids.screen_manager.get_screen('programs_screen')
+        programs_screen.on_enter()
+        nav_bar = self.root.ids.nav_bar
+        # виджет вкладки по имени
+        prog_item = next((widget for widget in nav_bar.children if hasattr(widget, 'name') and widget.name == 'programs_screen'), None)
+        if prog_item:
+            nav_bar.set_active_item(prog_item)
+        
             
 
 

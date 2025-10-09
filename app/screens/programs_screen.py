@@ -8,6 +8,7 @@ from kivymd.uix.textfield import MDTextField
 from kivymd.uix.menu import MDDropdownMenu
 from kivy.properties import ObjectProperty, StringProperty, NumericProperty
 from kivy.clock import Clock
+from kivymd.uix.label import MDLabel
     
 class ProgramCard(MDCard):
     screen = ObjectProperty(None)
@@ -89,7 +90,7 @@ class ProgramsScreen(MDScreen):
         container.clear_widgets()
         
         app = MDApp.get_running_app()
-        programs = app.logic.app_data.get('programs', [])
+        programs = app.logic.app_data.get('programs', [])   
 
         if programs:
             for program in programs:
@@ -100,6 +101,14 @@ class ProgramsScreen(MDScreen):
                     progression_type=program['progressionType']
                 )
                 container.add_widget(card)
+        else:
+            placeholder = MDLabel(
+                text= "Создайте свою первую программу",
+                halign="center",
+                theme_text_color="Secondary"
+            )
+            container.add_widget(placeholder)
+            return
                 
     def delete_program(self, program_id):
         app = MDApp.get_running_app()

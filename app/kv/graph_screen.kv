@@ -7,6 +7,11 @@
         padding: "10dp"
         spacing: "10dp"
 
+        MDLabel:
+            text: "Прогресс"
+            halign: "center"
+            font_style: 'Title'
+            adaptive_height: True
 
         MDBoxLayout:
             orientation: 'horizontal'
@@ -32,7 +37,6 @@
             text: "Выберите программу и упражнение, чтобы отследить прогресс"
             halign: 'center'
             font_style: 'Body'
-            role: "small"
             size_hint_y: None
             height: self.texture_size[1]
             padding: ("10dp", "10dp")

@@ -36,7 +36,7 @@ class GraphScreen(MDScreen):
         self.selected_program_id = program_data['id']
         self.program_menu.dismiss()
         
-        self.exercise_button_text = "Select Exercise"
+        self.exercise_button_text = "Упражнение"
         self.selected_exercise_id = None
         self.ids.graph_container.clear_widgets()
         self.ids.selected_point_label.text = ""

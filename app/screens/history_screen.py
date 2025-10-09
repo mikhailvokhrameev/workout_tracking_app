@@ -64,6 +64,7 @@ from kivymd.uix.card import MDCard
 from kivy.properties import ObjectProperty
 from kivy.clock import Clock
 from app.logic.components import SettingsTopAppBar
+from kivymd.uix.label import MDLabel
 
 class HistorySessionCard(MDCard):
     session = ObjectProperty(None)
@@ -107,9 +108,18 @@ class HistoryScreen(MDScreen):
         container.clear_widgets()
         history = app.logic.app_data.get('workoutHistory', [])
         
+        if not history:
+            placeholder = MDLabel(
+                text= "Нет завершенных тренировок",
+                halign="center",
+                theme_text_color="Secondary"
+            )
+            container.add_widget(placeholder)
+            return
+        
         for session in sorted(history, key=lambda x: x.get('date', ''), reverse=True):
             card = HistorySessionCard(session=session, screen=self)
-            container.add_widget(card)
+            container.add_widget(card, index=len(container.children))
     
     def delete_history_session(self, session_id):
         app = MDApp.get_running_app()
