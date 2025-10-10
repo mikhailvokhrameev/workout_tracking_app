@@ -1,8 +1,6 @@
-from kivy.lang import Builder
 from kivy.properties import StringProperty, ObjectProperty, BooleanProperty
 from kivymd.app import MDApp
-from kivymd.uix.navigationbar import MDNavigationBar, MDNavigationItem
-from kivymd.uix.screen import MDScreen
+from kivymd.uix.navigationbar import MDNavigationItem
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.button import MDButton, MDButtonText
@@ -48,7 +46,6 @@ class SettingsTopAppBar(MDBoxLayout):
             app.root.current = "main_screen"
 
     def open_confirm_dialog(self, *args):
-        # Всегда создаем новый диалог
         self._dialog = MDDialog(
             MDDialogHeadlineText(text="Подтвердить удаление"),
             MDDialogSupportingText(
@@ -81,7 +78,6 @@ class SettingsTopAppBar(MDBoxLayout):
             app.reset_all_data()
     
     def show_progression_info(self):
-        """Переключает на экран с информацией о прогрессии"""
         if self.screen_manager.current == "progressive_overload_screen":
             self.go_back()
         else:
