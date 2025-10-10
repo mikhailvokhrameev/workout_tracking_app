@@ -18,4 +18,22 @@
         halign: 'center'
         theme_text_color: "Secondary"
 
-            
+
+<SettingsTopAppBar@MDBoxLayout>:
+    orientation: 'vertical'
+    adaptive_height: True
+
+    MDTopAppBar:
+        id: top_app_bar
+        type: "small"
+
+        MDTopAppBarLeadingButtonContainer:
+            MDActionTopAppBarButton:
+                icon: "head-question-outline"
+                on_release: root.show_progression_info()
+
+        MDTopAppBarTrailingButtonContainer:
+            MDActionTopAppBarButton:
+                id: settings_button
+                icon: "cog-outline"
+                on_release: root.open_settings_menu(self)

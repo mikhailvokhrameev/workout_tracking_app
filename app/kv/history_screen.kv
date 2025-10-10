@@ -1,32 +1,10 @@
-<HistoryScreen>:
-    MDBoxLayout:
-        orientation: 'vertical'
-
-        # плейсхолдер если история пустая
-        Placeholder:
-            id: history_placeholder
-            opacity: 0
-            size_hint_y: None
-            height: 0
-
-        ScrollView:
-            id: history_scroll_view
-            opacity: 1
-
-            MDList:
-                id: full_history_container
-                padding: "10dp"
-                spacing: "10dp"
-                size_hint_y: None
-                height: self.minimum_height
-
-
 <HistorySessionCard>:
     padding: "15dp"
     spacing: "10dp"
     adaptive_height: True
     ripple_behavior: True
     style: "outlined"
+    line_color: app.theme_cls.primaryColor
 
     MDBoxLayout:
         adaptive_height: True
@@ -39,17 +17,31 @@
             spacing: "5dp"
             size_hint_x: 1
 
-            MDLabel:
-                text: root.session.get('date', 'Unknown Date')
-                font_style: 'Body'
-                role: 'large'
+            MDBoxLayout:
                 adaptive_height: True
+                spacing: "10dp"
+
+                MDLabel:
+                    text: root.session.get('date', 'Unknown Date')
+                    font_style: 'Body'
+                    adaptive_height: True
+                
+                MDLabel:
+                    text: root.session.get('programName', '')
+                    font_style: 'Body'
+                    bold: True
+                    halign: 'left'
+                    pos_hint: {"center_y": 0.5}
+                    adaptive_height: True
+            
+            MDDivider:
+                size_hint_x: 1
 
             MDBoxLayout:
                 id: history_items_container
                 orientation: 'vertical'
                 adaptive_height: True
-                spacing: '5dp'
+                spacing: '10dp'
                 padding: [0, "10dp", 0, 0]
         
         MDIconButton:
@@ -59,17 +51,39 @@
 
 
 <HistoryExerciseItem>:
+    orientation: 'vertical' 
     adaptive_height: True
-    spacing: '10dp'
+    spacing: '2dp'
     
     MDLabel:
         text: root.exercise_name
         bold: True
         adaptive_height: True
-        size_hint_x: 0.6
     
     MDLabel:
         text: root.sets_summary
         adaptive_height: True
-        halign: 'right'
-        size_hint_x: 0.4
+
+
+<HistoryScreen>:
+    MDBoxLayout:
+        orientation: 'vertical'
+
+        MDLabel:
+            text: "История тренировок"
+            halign: "center"
+            font_style: 'Title'
+            adaptive_height: True
+            padding: "10dp"
+
+        ScrollView:
+            id: history_scroll_view
+            do_scroll_x: False
+            do_scroll_y: True
+
+            MDList:
+                id: full_history_container
+                padding: "10dp"
+                spacing: "10dp"
+                size_hint_y: None
+                height: self.minimum_height

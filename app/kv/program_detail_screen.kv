@@ -50,7 +50,7 @@
             MDBoxLayout:
                 adaptive_height: True
                 spacing: '10dp'
-                padding: '10dp'
+                padding: '20dp'
 
                 MDTextField:
                     id: new_exercise_name
@@ -63,6 +63,12 @@
                 
                     MDTextFieldMaxLengthText:
                         max_text_length: 30
+                        spacing: '10dp'
+                        padding: '20dp'
+
+                    MDTextFieldHelperText:
+                        text: "Название не более 30 символов"
+                        mode: "on_error"
                 
                 MDButton:
                     style: "filled"

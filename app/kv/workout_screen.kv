@@ -1,21 +1,61 @@
+<WorkoutSummaryContent>:
+    orientation: 'vertical'
+    size_hint_y: None
+    height: self.minimum_height
+    padding: "24dp", "20dp", "24dp", "16dp"
+    spacing: "16dp"
+
+    MDLabel:
+        id: content
+        text: root.summary_text
+        font_style: "Body"
+        role: "large"
+        markup: True
+        size_hint_y: None
+        height: self.texture_size[1]
+        padding: "4dp", "0dp"
+        text_size: self.width, None
+
+
 <NewSetRow>:
     adaptive_height: True
     spacing: "8dp"
-    padding: ("8dp", 0)
+    padding: ("8dp", 0, 0, "24dp") 
+
+    MDLabel:
+        text: root.set_number
+        size_hint_x: 0.15
+        halign: "center"
+        valign: "center"
+        bold: True
 
     MDTextField:
         id: weight_input
         text: root.weight
+        on_text: root.weight = self.text
         input_filter: "float"
+        error: root.weight_error
+
         MDTextFieldHintText:
             text: "Вес"
+
+        MDTextFieldHelperText:
+            text: "Вес: 0 - 999 кг"
+            mode: "on_error"
 
     MDTextField:
         id: reps_input
         text: root.reps
+        on_text: root.reps = self.text
         input_filter: "int"
+        error: root.reps_error
+
         MDTextFieldHintText:
             text: "Повт."
+
+        MDTextFieldHelperText:
+            text: "Повторения: 0 - 99"
+            mode: "on_error"
 
     MDButton:
         on_release: root.panel_ref.remove_set_row(root)
@@ -34,9 +74,19 @@
 
             MDListItemSupportingText:
                 text: root.target_info
+                size_hint_y: None
+                height: self.texture_size[1]
+                text_size: self.width, None
+                shorten: False
+                shorten_from: "right"
 
             MDListItemTertiaryText:
                 text: root.last_workout_info
+                size_hint_y: None
+                height: self.texture_size[1]
+                text_size: self.width, None
+                shorten: False
+                shorten_from: "right"
 
             TrailingPressedIconButton:
                 id: chevron
@@ -46,9 +96,8 @@
     
     MDExpansionPanelContent:
         orientation: 'vertical'
-        # padding: "12dp", "12dp", "12dp", "12dp"
         adaptive_height: True
-
+        
         MDBoxLayout:
             id: new_sets_container
             orientation: 'vertical'
@@ -67,9 +116,16 @@
 
 <WorkoutScreen>:
     name: 'workout'
+    
 
     MDBoxLayout:
         orientation: 'vertical'
+
+        MDLabel:
+            text: "Тренировка"
+            halign: "center"
+            font_style: 'Title'
+            adaptive_height: True
         
         ScrollView:
             size_hint_y: 0.9
@@ -82,7 +138,7 @@
 
         MDButton:
             id: save_workout_btn
-            on_release: root.save_workout()
+            on_release: root.show_save_confirmation_dialog()
             pos_hint: {'center_x': 0.5}
             size_hint: (0.8, None)
             height: "48dp"

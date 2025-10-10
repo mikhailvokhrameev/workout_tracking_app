@@ -2,7 +2,7 @@
     orientation: 'vertical'
     style: "elevated"
     padding: "10dp"
-    spacing: "20dp"
+    spacing: "30dp"
     size_hint: .9, .5
     height: self.minimum_height
     pos_hint: {'center_x': .5, 'center_y': .5}
@@ -26,6 +26,10 @@
         
         MDTextFieldMaxLengthText:
             max_text_length: 30
+
+        MDTextFieldHelperText:
+            text: "Название не более 30 символов"
+            mode: "on_error"
 
     MDLabel:
         text: "тип прогрессии:"
@@ -70,7 +74,7 @@
         MDLabel:
             text: "Ваши программы"
             halign: "center"
-            font_style: 'Body'
+            font_style: 'Title'
             adaptive_height: True
 
         MDScrollView:
@@ -124,4 +128,3 @@
             icon: "trash-can-outline"
             pos_hint: {"center_y": 0.5}
             on_release: root.screen.delete_program(root.program_id)
-

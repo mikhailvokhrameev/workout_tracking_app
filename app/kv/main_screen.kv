@@ -2,7 +2,9 @@
 #:include app/kv/programs_screen.kv
 #:include app/kv/workout_screen.kv
 #:include app/kv/program_detail_screen.kv
-#:include app/kv/components.kv 
+#:include app/kv/progressive_overload_screen.kv
+#:include app/kv/components.kv
+#:include app/kv/graph_screen.kv
 
 
 <BaseMDNavigationItem>:
@@ -19,6 +21,9 @@ MDScreen:
         orientation: 'vertical'
         md_bg_color: self.theme_cls.backgroundColor
 
+        SettingsTopAppBar:
+            screen_manager: screen_manager
+
         MDScreenManager:
             id: screen_manager
 
@@ -34,12 +39,12 @@ MDScreen:
             ProgramDetailScreen:
                 name: 'program_detail'
             
-            MDScreen:
+            GraphScreen:
                 name: 'graph_screen'
+            
+            ProgressiveOverloadScreen:
+                name: 'progressive_overload_screen'
 
-                MDLabel:
-                    text: 'Содержимое экрана "Графики"'
-                    halign: 'center'
 
         MDNavigationBar:
             id: nav_bar
