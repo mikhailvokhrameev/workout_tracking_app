@@ -16,12 +16,6 @@
             spacing: "5dp"
             size_hint_x: 1
 
-            MDLabel:
-                text: "История тренировок"
-                halign: "center"
-                font_style: 'Title'
-                adaptive_height: True
-
             MDBoxLayout:
                 adaptive_height: True
                 spacing: "10dp"
@@ -70,6 +64,12 @@
 <HistoryScreen>:
     MDBoxLayout:
         orientation: 'vertical'
+
+        MDLabel:
+            text: "История тренировок"
+            halign: "center"
+            font_style: 'Title'
+            adaptive_height: True
 
         ScrollView:
             id: history_scroll_view

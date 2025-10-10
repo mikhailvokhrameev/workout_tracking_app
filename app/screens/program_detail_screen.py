@@ -47,7 +47,7 @@ class ProgramDetailScreen(MDScreen):
     def add_exercise(self):
         '''Добавляет новое упражнение в текущую программу'''
         name = self.ids.new_exercise_name.text.strip()
-        if name and self.program_id:
+        if len(name) <= 30 and self.program_id:
             app = MDApp.get_running_app()
             app.logic.add_exercise_to_program(name)
             self.ids.new_exercise_name.text = ""
