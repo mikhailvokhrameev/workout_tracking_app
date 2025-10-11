@@ -4,7 +4,7 @@
     padding: '40dp', '20dp'
     spacing: '20dp'
     pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-    opacity: 0 # По умолчанию скрыт
+    opacity: 0
     
     Image:
         source: 'app/assets/images/empty.png'
@@ -18,4 +18,22 @@
         halign: 'center'
         theme_text_color: "Secondary"
 
-            
+
+<SettingsTopAppBar@MDBoxLayout>:
+    orientation: 'vertical'
+    adaptive_height: True
+
+    MDTopAppBar:
+        id: top_app_bar
+        type: "small"
+
+        MDTopAppBarLeadingButtonContainer:
+            MDActionTopAppBarButton:
+                icon: "head-question-outline"
+                on_release: root.show_progression_info()
+
+        MDTopAppBarTrailingButtonContainer:
+            MDActionTopAppBarButton:
+                id: settings_button
+                icon: "cog-outline"
+                on_release: root.open_settings_menu(self)

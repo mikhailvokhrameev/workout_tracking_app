@@ -1,0 +1,80 @@
+<ProgressiveOverloadScreen>:
+    name: "progressive_overload_screen"
+
+    MDBoxLayout:
+        orientation: 'vertical'
+
+        ScrollView:
+            MDBoxLayout:
+                orientation: 'vertical'
+                adaptive_height: True
+                padding: "16dp"
+                spacing: "16dp"
+
+                MDLabel:
+                    text: "Что такое прогрессия нагрузки?"
+                    font_style: "Headline"
+                    role: "small"
+                    adaptive_height: True
+                    bold: True
+
+                MDLabel:
+                    text:
+                        "Прогрессивная перегрузка — это фундаментальный принцип силовых тренировок. " \
+                        "Он заключается в постепенном увеличении нагрузки на мышцы, чтобы они становились " \
+                        "сильнее и больше. Без постоянного вызова ваше тело не будет иметь причин для адаптации."
+                    adaptive_height: True
+                    text_size: self.width, None
+
+                MDLabel:
+                    text: "Зачем она нужна?"
+                    font_style: "Headline"
+                    role: "small"
+                    adaptive_height: True
+                    bold: True
+
+                MDLabel:
+                    text:
+                        "Основная цель — избежать плато в тренировках. Если вы выполняете одни и те же " \
+                        "упражнения с одинаковым весом и повторениями, ваше тело быстро адаптируется, и " \
+                        "прогресс остановится. Прогрессия заставляет мышцы работать усерднее, что " \
+                        "стимулирует их рост (гипертрофию) и увеличение силы."
+                    adaptive_height: True
+                    text_size: self.width, None
+
+                MDLabel:
+                    text: "Виды прогрессии и их расчет"
+                    font_style: "Headline"
+                    role: "small"
+                    adaptive_height: True
+                    bold: True
+
+                MDLabel:
+                    text:
+                        "[b]1. Двойная прогрессия (Double Progression)[/b]\n" \
+                        "Вы работаете в заданном диапазоне повторений (например, 6-10). Как только вы " \
+                        "можете выполнить верхнюю границу диапазона (10 повторений) во всех подходах, вы " \
+                        "увеличиваете вес и снова начинаете с нижней границы (6 повторений)."
+                    adaptive_height: True
+                    text_size: self.width, None
+                    markup: True
+
+                MDLabel:
+                    text:
+                        "[b]2. Линейная прогрессия (Linear Progression)[/b]\n" \
+                        "Вы добавляете небольшой вес к штанге на каждой тренировке, сохраняя количество " \
+                        "подходов и повторений (например, 5x5). Этот метод отлично работает для новичков, " \
+                        "так как их тело быстро адаптируется."
+                    adaptive_height: True
+                    text_size: self.width, None
+                    markup: True
+
+                MDLabel:
+                    text:
+                        "[b]3. Прогрессия по диапазону повторений (Rep Range Progression)[/b]\n" \
+                        "Вы увеличиваете только количество повторений на каждой тренировке. Как только " \
+                        "достигаете верхней границы диапазона (например, 12 повторений), вы можете " \
+                        "увеличить вес и вернуться к нижней границе."
+                    adaptive_height: True
+                    text_size: self.width, None
+                    markup: True

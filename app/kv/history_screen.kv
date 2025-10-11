@@ -1,37 +1,89 @@
+<HistorySessionCard>:
+    padding: "15dp"
+    spacing: "10dp"
+    adaptive_height: True
+    ripple_behavior: True
+    style: "outlined"
+    line_color: app.theme_cls.primaryColor
+
+    MDBoxLayout:
+        adaptive_height: True
+        orientation: 'horizontal'
+        spacing: "10dp"
+
+        MDBoxLayout:
+            orientation: 'vertical'
+            adaptive_height: True
+            spacing: "5dp"
+            size_hint_x: 1
+
+            MDBoxLayout:
+                adaptive_height: True
+                spacing: "10dp"
+
+                MDLabel:
+                    text: root.session.get('date', 'Unknown Date')
+                    font_style: 'Body'
+                    adaptive_height: True
+                
+                MDLabel:
+                    text: root.session.get('programName', '')
+                    font_style: 'Body'
+                    bold: True
+                    halign: 'left'
+                    pos_hint: {"center_y": 0.5}
+                    adaptive_height: True
+            
+            MDDivider:
+                size_hint_x: 1
+
+            MDBoxLayout:
+                id: history_items_container
+                orientation: 'vertical'
+                adaptive_height: True
+                spacing: '10dp'
+                padding: [0, "10dp", 0, 0]
+        
+        MDIconButton:
+            icon: "trash-can-outline"
+            pos_hint: {"center_y": 0.5}
+            on_release: root.screen.delete_history_session(root.session.get('id'))
+
+
+<HistoryExerciseItem>:
+    orientation: 'vertical' 
+    adaptive_height: True
+    spacing: '2dp'
+    
+    MDLabel:
+        text: root.exercise_name
+        bold: True
+        adaptive_height: True
+    
+    MDLabel:
+        text: root.sets_summary
+        adaptive_height: True
+
+
 <HistoryScreen>:
     MDBoxLayout:
         orientation: 'vertical'
 
-        Placeholder:
-            id: history_placeholder
+        MDLabel:
+            text: "История тренировок"
+            halign: "center"
+            font_style: 'Title'
+            adaptive_height: True
+            padding: "10dp"
 
         ScrollView:
             id: history_scroll_view
+            do_scroll_x: False
+            do_scroll_y: True
 
             MDList:
                 id: full_history_container
                 padding: "10dp"
                 spacing: "10dp"
-
-<HistorySessionCard>:
-    orientation: 'vertical'
-    adaptive_height: True
-    padding: "10dp"
-    spacing: "10dp"
-    md_bg_color: app.theme_cls.bg_light
-
-    MDLabel:
-        text: root.session.get('date', 'Unknown Date')
-        font_style: 'Body'
-        adaptive_height: True
-    
-    MDBoxLayout:
-        id: history_items_container
-        orientation: 'vertical'
-        adaptive_height: True
-        spacing: '5dp'
-    
-    MDButton:
-        style: "elevated"
-        text: "Удалить запись"
-        on_press: root.screen.delete_history_session(root.session.get('id'))
+                size_hint_y: None
+                height: self.minimum_height
