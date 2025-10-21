@@ -35,7 +35,7 @@ class NewProgramDialog(MDDialog):
         self.screen = screen
         self.prog_map_display = {
             "linear": "линейная (3x12)",
-            "double": "двойная (3x6-10)",
+            "double": "двойная (3x8-10)",
         }
         self.selected_prog_type = "double"
 

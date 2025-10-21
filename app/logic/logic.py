@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 
-from app.logic.models import get_active_program, get_program_by_id, find_exercise_by_id
+from app.logic.models import get_active_program, get_program_by_id, find_exercise_by_id, get_last_workout_for_exercise as find_last_workout_in_history
 from app.logic.services import WorkoutService
 from app.logic.session_state import SessionState
 from app.logic.storage import AppStorage
@@ -33,6 +33,9 @@ class ProgressiveOverloadLogic:
 
     def find_exercise_by_id(self, exercise_id: int) -> Optional[Dict[str, Any]]:
         return find_exercise_by_id(self.storage.get(), exercise_id)
+    
+    def get_last_workout_for_exercise(self, exercise_id: int) -> Optional[Dict[str, Any]]:
+        return find_last_workout_in_history(self.storage.get(), exercise_id)
 
     # CRUD
 
@@ -103,6 +106,5 @@ class ProgressiveOverloadLogic:
 
     def get_progress_chart_data(self, exercise_id: int) -> Optional[Dict[str, List]]:
         return self.service.get_progress_chart_data(exercise_id)
-
 
     

@@ -19,6 +19,8 @@ from kivy.uix.widget import Widget
 from kivymd.uix.button import MDButton, MDButtonText
 from kivymd.uix.label import MDLabel
 
+from app.logic.progression import calculate_next_target
+
 
 def _logic():
     return MDApp.get_running_app().logic
@@ -148,20 +150,32 @@ class WorkoutScreen(MDScreen):
             return
 
         snapshot = _session_snapshot()
+        progression_type = active_program.get("progressionType", "double")
+        
         for ex in active_program["exercises"]:
-            last_workout = ex["history"][-1] if ex.get("history") else None
-            last_workout_text = "Это первая тренировка!"
+            last_workout = logic.get_last_workout_for_exercise(ex['id'])
+
+            next_target = calculate_next_target(ex, last_workout, progression_type)
+
+            last_workout_text = ""
             if last_workout:
-                sets_str = ", ".join([f"{s['reps']}x{s['weight']}кг" for s in last_workout.get("sets", [])])
-                last_workout_text = f"Прошлая: {sets_str}"
+                sets_list = last_workout.get("sets", [])
+                last_workout_text = ("Прошлая: " + ", ".join([f"{s['reps']}x{s['weight']}кг" for s in sets_list])
+                                if sets_list else "Прошлая тренировка без рабочих подходов")
+            else:
+                last_workout_text = "Это первая тренировка!"
 
-            target_text = "Выполните рабочие подходы"
-            if ex.get("nextTarget"):
-                target = ex["nextTarget"]
-                w = target.get("weight", "")
-                w_text = f" с весом ~[b]{w} кг[/b]" if w != "" else ""
-                target_text = f"Цель: {target.get('text','')}"+w_text
-
+            target_text = "Цель не рассчитана"
+            if next_target:
+                base_text = next_target.get('text', '')
+                if last_workout:
+                    w = next_target.get("weight", "")
+                    w_text = f" с весом ~[b]{w} кг[/b]" if w else ""
+                    target_text = f"Цель: {base_text}{w_text}"
+                else:
+                    target_text = f"Цель: {base_text}"
+            
+            
             panel = ExpansionPanelItem(
                 exercise_id=ex["id"],
                 exercise_name=ex["name"],
@@ -173,6 +187,7 @@ class WorkoutScreen(MDScreen):
                 panel.add_set_row(set_data=s)
 
             container.add_widget(panel)
+
 
     def _collect_ui_data(self):
         logic = _logic()

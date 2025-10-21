@@ -19,3 +19,13 @@ def find_exercise_by_id(app_data: Dict[str, Any], exercise_id: int) -> Optional[
             if ex.get("id") == exercise_id:
                 return {**ex, "programId": p.get("id")}
     return None
+
+def get_last_workout_for_exercise(app_data: Dict[str, Any], exercise_id: int) -> Optional[Dict[str, Any]]:
+    workout_history = app_data.get("workoutHistory", [])
+
+    for workout_session in reversed(workout_history):
+        for exercise_in_session in workout_session.get("exercises", []):
+            if exercise_in_session.get("exerciseId") == exercise_id:
+                return exercise_in_session
+    
+    return None
