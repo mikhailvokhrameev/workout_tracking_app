@@ -245,7 +245,7 @@ class WorkoutScreen(MDScreen):
         summary_data = logic.generate_workout_summary(self.pending_workout_data)
         final_text = ""
         if not summary_data["all_goals_achieved"]:
-            final_text += "Ничего страшного! Результаты оказались чуть ниже.\n\n"
+            final_text += "Ничего страшного! Результаты оказались чуть ниже ожидаемых.\n\n"
         final_text += "[b]Детали прогресса:[/b]\n\n"
         for detail in summary_data["details"]:
             final_text += f"{detail['exercise_name']}: {detail['message']}\n"

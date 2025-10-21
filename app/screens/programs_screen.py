@@ -34,9 +34,8 @@ class NewProgramDialog(MDDialog):
         super().__init__(**kwargs)
         self.screen = screen
         self.prog_map_display = {
-            "linear": "линейная (5x5)",
+            "linear": "линейная (3x12)",
             "double": "двойная (3x6-10)",
-            "rep_range": "диапазон (3x8-12)",
         }
         self.selected_prog_type = "double"
 

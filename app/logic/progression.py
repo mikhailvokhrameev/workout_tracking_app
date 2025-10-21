@@ -1,52 +1,107 @@
 from __future__ import annotations
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
+from typing import Dict, Any, Optional
 
-def calculate_next_target(exercise: Dict[str, Any], last_workout: Dict[str, Any], progression_type: str) -> Dict[str, Any]:
-    last_working_sets = [s for s in last_workout.get("sets", []) if s.get("type") == "normal"]
+def calculate_next_target(exercise: Dict[str, Any], last_workout: Optional[Dict[str, Any]], progression_type: str) -> Dict[str, Any]:
+    """
+    Рассчитывает следующую цель для 'linear' или 'double' прогрессии.
+    
+    - Если у упражнения нет цели, устанавливает ее на основе лучшего сета из last_workout (без инкремента).
+    - Если у упражнения уже есть цель, рассчитывает новую цель с инкрементом веса.
+    """
+    last_working_sets = []
+    if last_workout:
+        last_working_sets = [s for s in last_workout.get("sets", []) if s.get("type") == "normal"]
+
     if not last_working_sets:
+        # Стартовая цель, если данных нет
         base_text = {
-            "linear": "5 подходов по 5 повторений",
+            "linear": "3 подхода по 12 повторений",
             "double": "3 подхода по 6-10 повторений",
-            "rep_range": "3 подхода по 8-12 повторений",
         }
         return {
-            "weight": 20,
-            "sets": 5 if progression_type == "linear" else 3,
-            "reps": 5 if progression_type == "linear" else ("8-12" if progression_type == "rep_range" else 6),
+            "weight": 20, "sets": 3,
+            "reps": 12 if progression_type == "linear" else 6,
             "text": base_text.get(progression_type, base_text["double"]),
         }
 
-    last_weight = float(last_working_sets[0]["weight"])
-    weight_increment = 2.5 if last_weight > 40 else 1.25
-    new_weight = round((last_weight + weight_increment) * 4) / 4
-    targets = {
-        "linear": {"weight": new_weight, "sets": 5, "reps": 5, "text": "5 подходов по 5 повторений"},
-        "double": {"weight": new_weight, "sets": 3, "reps": 6, "text": "3 подхода по 6-10 повторений"},
-        "rep_range": {"weight": new_weight, "sets": 3, "reps": "8-12", "text": "3 подхода по 8-12 повторений"},
-    }
-    return targets.get(progression_type, targets["rep_range"])
+    if progression_type == "linear":
+        # 1. Определяем базовый вес из последней тренировки
+        qualifying_weights = [float(s["weight"]) for s in last_working_sets if s.get("reps", 0) >= 12]
+        if qualifying_weights:
+            base_weight = max(qualifying_weights)
+        else:
+            all_weights = [float(s.get("weight", 0)) for s in last_working_sets]
+            base_weight = max(all_weights) if all_weights else 0
+
+        # Проверяем наличие существующей цели
+        has_existing_target = exercise.get("nextTarget") and exercise["nextTarget"].get("weight")
+
+        if not has_existing_target:
+            # ЦЕЛИ НЕТ (ПЕРВАЯ ТРЕНИРОВКА): Устанавливаем цель без инкремента.
+            new_weight = base_weight
+        else:
+            # ЦЕЛЬ ЕСТЬ: Увеличиваем вес.
+            weight_increment = 2.5 if base_weight > 40 else 1.25
+            new_weight = round((base_weight + weight_increment) * 4) / 4
+        
+        return {
+            "weight": new_weight, "sets": 3, "reps": 12, "text": "3 подхода по 12 повторений"
+        }
+
+    # --- ИЗМЕНЕННАЯ ЛОГИКА ДЛЯ ДРУГИХ ТИПОВ ПРОГРЕССИИ ---
+    elif progression_type == "double":
+        # Логика расчета для двойной прогрессии
+        base_weight = float(last_working_sets[0]["weight"])
+        weight_increment = 2.5 if base_weight > 40 else 1.25
+        new_weight = round((base_weight + weight_increment) * 4) / 4
+        return {
+            "weight": new_weight, "sets": 3, "reps": 6, "text": "3 подхода по 6-10 повторений"
+        }
+    
+    else:
+        # Безопасный fallback на случай, если придет неизвестный тип прогрессии.
+        # Возвращаем стартовую цель для двойной прогрессии.
+        return {
+            "weight": 20, "sets": 3, "reps": 6, "text": "3 подхода по 6-10 повторений"
+        }
+
+
+
 
 
 def check_goal_achievement(exercise: Dict[str, Any], new_working_sets: List[Dict[str, Any]], progression_type: str) -> bool:
+    """
+    Проверяет, была ли достигнута текущая цель в выполненной тренировке.
+    """
     if not exercise.get("nextTarget"):
-        return True
+        return True  # Если цели не было, считаем ее достигнутой.
+
     try:
         target_weight = float(exercise["nextTarget"]["weight"])
+
         if progression_type == "linear":
-            linear_sets = new_working_sets[:5]
-            return len(linear_sets) >= 5 and all(
-                float(s["reps"]) >= 5 and float(s["weight"]) >= target_weight for s in linear_sets
+            target_reps = 12
+            target_sets_count = 3
+            linear_sets = [s for s in new_working_sets if s.get("type") == "normal"]
+            
+            # Цель достигнута, если есть как минимум 3 подхода, и все они
+            # соответствуют целевому весу и повторениям.
+            if len(linear_sets) < target_sets_count:
+                return False
+
+            # Проверяем первые 3 подхода
+            return all(
+                s.get("reps", 0) >= target_reps and float(s.get("weight", 0)) >= target_weight
+                for s in linear_sets[:target_sets_count]
             )
+
         elif progression_type == "double":
             double_sets = new_working_sets[:3]
             return len(double_sets) >= 3 and all(
                 float(s["reps"]) >= 10 and float(s["weight"]) >= target_weight for s in double_sets
             )
-        elif progression_type == "rep_range":
-            main_set = new_working_sets[0] if new_working_sets else None
-            return bool(main_set) and float(main_set["reps"]) >= 12 and float(main_set["weight"]) >= target_weight
-        return True
     except (ValueError, TypeError, KeyError):
         return True
 

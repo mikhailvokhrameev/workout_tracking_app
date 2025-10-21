@@ -118,7 +118,8 @@
                 adaptive_height: True
 
             MDLabel:
-                text: {'linear': 'Линейная (5x5)', 'double': 'Двойная (3x6-10)', 'rep_range': 'Диапазон (3x8-12)'}[root.progression_type]
+                text: {'linear': 'Линейная (3x12)', 'double': 'Двойная (3x6-10)'}.get(root.progression_type, 'Двойная (3x6-10)')
+
                 font_style: 'Body'
                 role: 'small'
                 theme_text_color: "Secondary"
