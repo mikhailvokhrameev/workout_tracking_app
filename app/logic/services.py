@@ -200,25 +200,49 @@ class WorkoutService:
 
         return {"all_goals_achieved": all_goals_achieved, "details": summary_details}
 
-
     def delete_history_session(self, session_id: int) -> None:
         app_data = self.storage.get()
-        session_to_delete = next((s for s in app_data.get("workoutHistory", []) if s.get("id") == session_id), None)
+
+        history = app_data.get("workoutHistory", [])
+        session_to_delete = next((s for s in history if s.get("id") == session_id), None)
         if not session_to_delete:
             return
 
-        app_data["workoutHistory"] = [s for s in app_data["workoutHistory"] if s.get("id") != session_id]
+        app_data["workoutHistory"] = [s for s in history if s.get("id") != session_id]
 
-        for program in app_data.get("programs", []):
-            for exercise in program.get("exercises", []):
-                is_ex_in_session = any(
-                    ex.get("exerciseId") == exercise.get("id") for ex in session_to_delete.get("exercises", [])
+        active_program = get_active_program(app_data)
+        if active_program:
+            progression_type = active_program.get("progressionType", "double")
+            history_after = app_data.get("workoutHistory", [])
+
+            for prog_ex in active_program.get("exercises", []):
+                ex_id = prog_ex.get("id")
+
+                last_workout_for_ex = None
+                for workout_session in reversed(history_after):
+                    for ex_entry in workout_session.get("exercises", []):
+                        if ex_entry.get("exerciseId") == ex_id:
+                            working_sets = [s for s in ex_entry.get("sets", []) if s.get("type") == "normal"]
+                            last_workout_for_ex = {"sets": working_sets}
+                            break
+                    if last_workout_for_ex is not None:
+                        break
+
+                prev_target = prog_ex.get("nextTarget")
+                prog_ex["nextTarget"] = None
+
+                new_target = calculate_next_target(
+                    prog_ex,
+                    last_workout_for_ex,
+                    progression_type
                 )
-                if is_ex_in_session:
-                    exercise["history"] = [
-                        h for h in exercise.get("history", []) if h.get("date") != session_to_delete.get("date")
-                    ]
+
+                prog_ex["nextTarget"] = new_target
+
         self.storage.save()
+        print("цель обновлена, теперь: ", prog_ex["nextTarget"])
+
+
 
 
     def get_progress_chart_data(self, exercise_id: int) -> Optional[Dict[str, List]]:

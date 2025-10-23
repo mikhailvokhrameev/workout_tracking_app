@@ -1,45 +1,92 @@
 from __future__ import annotations
-
+from kivymd.app import MDApp
 from typing import Any, Dict, List, Optional, Tuple
 
-def calculate_next_target(exercise: Dict[str, Any], last_workout: Optional[Dict[str, Any]], progression_type: str) -> Dict[str, Any]:
 
+def calculate_next_target(exercise: Dict[str, Any], last_workout: Optional[Dict[str, Any]], progression_type: str) -> Dict[str, Any]:
     last_working_sets = [s for s in last_workout.get("sets", []) if s.get("type") == "normal"] if last_workout else []
 
     if not last_working_sets:
         if progression_type == "linear":
-            return {
+            result = {
                 "weight": None, "sets": 3, "reps": 12,
                 "text": "3 подх. по 12 повт. с макс. весом"
             }
         else:
-            return {
+            result = {
                 "weight": None, "sets": 3, "reps": 8,
                 "text": "3 подх. по 8 повт. с макс. весом"
             }
-    
-    if progression_type == "linear":
-        qualifying_weights = [float(s["weight"]) for s in last_working_sets if s.get("reps", 0) >= 12]
-        if qualifying_weights:
-            base_weight = max(qualifying_weights)
-        else:
-            all_weights = [float(s.get("weight", 0)) for s in last_working_sets]
-            base_weight = max(all_weights) if all_weights else 0
+        return result
 
-        has_existing_target = exercise.get("nextTarget") and exercise["nextTarget"].get("weight")
+    # if progression_type == "linear":
+    #     qualifying_weights = [float(s["weight"]) for s in last_working_sets if s.get("reps", 0) >= 12]
+    #     if qualifying_weights:
+    #         base_weight = max(qualifying_weights)
+    #     else:
+    #         all_weights = [float(s.get("weight", 0)) for s in last_working_sets]
+    #         base_weight = max(all_weights) if all_weights else 0
 
-        if not has_existing_target:
-            new_weight = base_weight
-        else:
-            weight_increment = 2.5 if base_weight > 40 else 1.25
-            new_weight = round((base_weight + weight_increment) * 4) / 4
+    #     has_existing_target = exercise.get("nextTarget") and exercise["nextTarget"].get("weight")
+
+    #     if not has_existing_target:
+    #         new_weight = base_weight
+    #     else:
+    #         weight_increment = 2.5 if base_weight > 40 else 1.25
+    #         new_weight = round((base_weight + weight_increment) * 4) / 4
+
+    #     result = {
+    #         "weight": new_weight, "sets": 3, "reps": 12, "text": "3 подхода по 12 повторений"
+    #     }
         
-        return {
-            "weight": new_weight, "sets": 3, "reps": 12, "text": "3 подхода по 12 повторений"
-        }
+    #     return result
+    if progression_type == "linear":
+        first_three = last_working_sets[:3]
+
+        # Если нет хотя бы трех рабочих подходов, ориентируем на 3×12 без прибавки
+        if len(first_three) < 3:
+            # берём максимальный текущий вес как рабочий уровень
+            base_w = max(float(s.get("weight", 0.0)) for s in first_three) if first_three else 0.0
+            return {
+                "weight": base_w if base_w > 0 else None,
+                "sets": 3, "reps": 12,
+                "text": "3 подхода по 12 повторений"
+            }
+
+        all_12 = all(int(float(s.get("reps", 0))) >= 12 for s in first_three)
+
+        if all_12:
+            weights = [float(s.get("weight", 0.0)) for s in first_three]
+            min_w, max_w = min(weights), max(weights)
+            if abs(max_w - min_w) < 1e-9:
+                # Все три сета на одном весе: можно повышать
+                step = 2.5 if max_w > 40 else 1.25
+                new_weight = round((max_w + step) * 4) / 4
+            else:
+                # Смешанные веса: цель = 3×12 на максимальном достигнутом весе
+                new_weight = max_w
+            return {
+                "weight": new_weight, "sets": 3, "reps": 12,
+                "text": "3 подхода по 12 повторений"
+            }
+        else:
+            # 3×12 не закрыты: если есть хотя бы один сет на 12 — целимся в 3×12 на максимальном весе,
+            # где 12 было достигнуто; иначе — держим 3×12 на текущем рабочем уровне.
+            weights_with_12 = [
+                float(s.get("weight", 0.0)) for s in first_three if int(float(s.get("reps", 0))) >= 12
+            ]
+            if weights_with_12:
+                target_w = max(weights_with_12)
+            else:
+                target_w = max(float(s.get("weight", 0.0)) for s in first_three) if first_three else 0.0
+            return {
+                "weight": target_w if target_w > 0 else None,
+                "sets": 3, "reps": 12,
+                "text": "3 подхода по 12 повторений"
+            }
         
     elif progression_type == "double":
-        INCREMENT_KG = 1.25
+        weight_increment = 1.25
         current_target = exercise.get("nextTarget") or {}
         has_target = "weight" in current_target
 
@@ -58,10 +105,12 @@ def calculate_next_target(exercise: Dict[str, Any], last_workout: Optional[Dict[
 
         first_three = last_working_sets[:3]
         if len(first_three) < 3:
-            return {
+            result = {
                 "weight": float(current_weight), "sets": 3, "reps": int(current_reps),
                 "text": f"3 подх. x {current_reps} повт.",
             }
+            
+            return result
             
         achieved_current = all(
             int(float(s.get("reps", 0))) >= current_reps and float(s.get("weight", 0.0)) >= current_weight
@@ -74,16 +123,18 @@ def calculate_next_target(exercise: Dict[str, Any], last_workout: Optional[Dict[
             min_reps_achieved = min(int(float(s.get("reps", 0))) for s in first_three)
 
             if min_reps_achieved >= 10:
-                next_weight = round((current_weight + INCREMENT_KG) * 4) / 4
+                next_weight = round((current_weight + weight_increment) * 4) / 4
                 next_reps = 8
             else:
                 next_reps = min_reps_achieved + 1
                 next_weight = current_weight
 
-        return {
+        result = {
             "weight": float(next_weight), "sets": 3, "reps": int(next_reps),
             "text": f"3 подх. x {int(next_reps)} повт.",
         }
+        
+        return result
 
 
 
