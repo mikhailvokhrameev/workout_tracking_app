@@ -205,7 +205,11 @@ android.accept_sdk_license = True
 #android.add_resources =
 
 # (list) Gradle dependencies to add
-#android.gradle_dependencies =
+
+android.gradle_plugin = 7.4.2
+android.gradle_distribution_url = https://services.gradle.org/distributions/gradle-7.6-bin.zip
+#android.gradle_dependencies = 
+android.gradle_dependencies = com.android.tools.build:gradle:7.4.2
 
 # (bool) Enable AndroidX support. Enable when 'android.gradle_dependencies'
 # contains an 'androidx' package, or any package from Kotlin source.
@@ -287,7 +291,8 @@ android.enable_androidx = True
 
 # (list) The Android archs to build for, choices: armeabi-v7a, arm64-v8a, x86, x86_64
 # In past, was `android.arch` as we weren't supporting builds for multiple archs at the same time.
-android.archs = arm64-v8a, armeabi-v7a
+# android.archs = arm64-v8a, armeabi-v7a
+android.archs = arm64-v8a
 
 # (int) overrides automatic versionCode computation (used in build.gradle)
 # this is not the same as app version and should only be edited if you know what you're doing
