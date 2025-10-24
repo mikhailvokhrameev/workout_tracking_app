@@ -25,8 +25,8 @@ from app.screens.workout_screen import (
 from app.screens.graph_screen import GraphScreen
 from app.screens.progressive_overload_screen import ProgressiveOverloadScreen
 
-Window.size = (400, 750)
-
+Window.keyboard_anim_args = {"d": .2, "t": "in_out_quart"}
+Window.softinput_mode = "below_target"
 
 class MainApp(MDApp):
     def build(self):
@@ -37,7 +37,7 @@ class MainApp(MDApp):
 
         return Builder.load_file("app/kv/main_screen.kv")
 
-    def on_start(self):
+    def on_start(self):   
         self.root.ids.screen_manager.current = "programs_screen"
 
     def on_switch_tabs(
