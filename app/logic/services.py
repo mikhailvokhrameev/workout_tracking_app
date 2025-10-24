@@ -32,8 +32,8 @@ class WorkoutService:
 
     def delete_program(self, program_id: int) -> bool:
         app_data = self.storage.get()
-        if len(app_data.get("programs", [])) <= 1:
-            return False
+        # if len(app_data.get("programs", [])) <= 1:
+        #     return False
         app_data["programs"] = [p for p in app_data["programs"] if p.get("id") != program_id]
         if app_data.get("activeProgramId") == program_id:
             app_data["activeProgramId"] = app_data["programs"][0]["id"] if app_data["programs"] else None

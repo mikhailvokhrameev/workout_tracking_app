@@ -56,27 +56,28 @@
 
                 MDTextField:
                     id: new_exercise_name
-                    hint_text: "Новое упражнение"
                     mode: "outlined"
+                    size_hint_x: 1
+                    multiline: False
 
                     MDTextFieldHintText:
                         text: "название упражнения"
                         text_color_normal: "grey"
-                
+
                     MDTextFieldMaxLengthText:
                         max_text_length: 30
-                        spacing: '10dp'
-                        padding: '20dp'
+                        # удалены spacing/padding, мешающие расчёту компоновки
 
                     MDTextFieldHelperText:
                         text: "Название не более 30 символов"
                         mode: "on_error"
-                
+
                 MDButton:
                     style: "filled"
                     on_release: root.add_exercise()
                     MDButtonText:
                         text: "Добавить"
+
                         
             MDButton:
                 style: "filled"

@@ -22,17 +22,21 @@
 <NewSetRow>:
     adaptive_height: True
     spacing: "8dp"
-    padding: ("8dp", 0, 0, "24dp") 
+    padding: ("8dp", 0, 0, "24dp")
 
     MDLabel:
         text: root.set_number
-        size_hint_x: 0.15
+        size_hint_x: None
+        width: "36dp"
         halign: "center"
         valign: "center"
         bold: True
+        text_size: self.size
+
 
     MDTextField:
         id: weight_input
+        size_hint_x: 0.38
         text: root.weight
         on_text: root.weight = self.text
         input_filter: "float"
@@ -45,8 +49,10 @@
             text: "Вес: 0 - 999 кг"
             mode: "on_error"
 
+
     MDTextField:
         id: reps_input
+        size_hint_x: 0.38
         text: root.reps
         on_text: root.reps = self.text
         input_filter: "int"
@@ -60,10 +66,13 @@
             mode: "on_error"
 
     MDButton:
+        size_hint_x: None
+        width: "48dp"
         on_release: root.panel_ref.remove_set_row(root)
         pos_hint: {"center_y": 0.5}
         MDButtonIcon:
             icon: "trash-can-outline"
+
 
 <ExpansionPanelItem>:
 
@@ -73,6 +82,11 @@
 
             MDListItemHeadlineText:
                 text: root.exercise_name
+                size_hint_y: None
+                height: self.texture_size[1]
+                text_size: self.width, None
+                shorten: False
+                shorten_from: "right"
 
             MDListItemSupportingText:
                 text: root.target_info
@@ -95,18 +109,17 @@
                 icon: "chevron-right"
                 on_release: app.tap_expansion_chevron(root, self)
 
-    
     MDExpansionPanelContent:
         orientation: 'vertical'
         adaptive_height: True
-        
+
         MDBoxLayout:
             id: new_sets_container
             orientation: 'vertical'
             adaptive_height: True
             spacing: "4dp"
             padding: "8dp"
-            
+
         MDButton:
             on_release: root.add_set_row()
             pos_hint: {'center_x': 0.5}
@@ -118,7 +131,6 @@
 
 <WorkoutScreen>:
     name: 'workout'
-    
 
     MDBoxLayout:
         orientation: 'vertical'
@@ -128,16 +140,16 @@
             halign: "center"
             font_style: 'Title'
             adaptive_height: True
-        
+
         ScrollView:
             size_hint_y: 0.9
-            
+
             MDList:
                 id: today_workout_container
                 adaptive_height: True
                 padding: "8dp"
                 spacing: "8dp"
-
+        
         MDButton:
             id: save_workout_btn
             on_release: root.show_save_confirmation_dialog()
