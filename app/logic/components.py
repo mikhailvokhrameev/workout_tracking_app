@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from kivy.properties import StringProperty, ObjectProperty, BooleanProperty
 from kivymd.app import MDApp
 from kivymd.uix.navigationbar import MDNavigationItem

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from __future__ import annotations
 from kivymd.app import MDApp
 from typing import Any, Dict, List, Optional, Tuple

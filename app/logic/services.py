@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from __future__ import annotations
 import time
 from datetime import datetime
@@ -173,8 +175,10 @@ class WorkoutService:
                 detail["message"] = "Отличное начало! "
                 potential = calculate_next_target(program_exercise, {"sets": new_working_sets}, progression_type)
                 detail["next_target_text"] = (
+                    # f"Цель на следующую тренировку: {potential['text']}"
+                    # f"{f' с весом {potential['weight']} кг' if 'weight' in potential else ''}"
                     f"Цель на следующую тренировку: {potential['text']}"
-                    f"{f' с весом {potential['weight']} кг' if 'weight' in potential else ''}"
+                    + (f" с весом {potential['weight']} кг" if "weight" in potential else "")
                 )
             else:
                 is_goal = check_goal_achievement(program_exercise, new_working_sets, progression_type)
@@ -183,8 +187,10 @@ class WorkoutService:
                     detail["message"] = "Цель достигнута! "
                     potential = calculate_next_target(program_exercise, {"sets": new_working_sets}, progression_type)
                     detail["next_target_text"] = (
+                        # f"Следующая цель: {potential['text']}"
+                        # f"{f' с весом {potential['weight']} кг' if 'weight' in potential else ''}"
                         f"Следующая цель: {potential['text']}"
-                        f"{f' с весом {potential['weight']} кг' if 'weight' in potential else ''}"
+                        + (f" с весом {potential['weight']} кг" if "weight" in potential else "")
                     )
                 else:
                     all_goals_achieved = False
@@ -192,8 +198,10 @@ class WorkoutService:
                     detail["message"] = "Цель не достигнута. "
                     nt = program_exercise["nextTarget"]
                     detail["next_target_text"] = (
+                        # f"Повторите: {nt['text']}"
+                        # f"{f' с весом {nt['weight']} кг' if 'weight' in nt else ''}"
                         f"Повторите: {nt['text']}"
-                        f"{f' с весом {nt['weight']} кг' if 'weight' in nt else ''}"
+                        + (f" с весом {nt['weight']} кг" if "weight" in nt else "")
                     )
 
             summary_details.append(detail)
