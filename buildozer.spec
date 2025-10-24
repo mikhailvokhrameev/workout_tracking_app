@@ -39,7 +39,7 @@ version = 0.1
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3, kivy==2.3.1,kivy_garden,kivy_garden.graph, git+https://github.com/kivymd/KivyMD@master, exceptiongroup, asynckivy, asyncgui, materialyoucolor, android
+requirements = python3, kivy==2.3.1,kivy_garden==0.1.5,kivy_garden.graph==0.4.1.dev0, git+https://github.com/kivymd/KivyMD@master, exceptiongroup, asynckivy, asyncgui, materialyoucolor, android
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -47,10 +47,10 @@ requirements = python3, kivy==2.3.1,kivy_garden,kivy_garden.graph, git+https://g
 
 # (str) Presplash of the application
 presplash.filename = %(source.dir)s/images/presplash.png
-android.presplash_color = 0xffffffff
 
 # (str) Icon of the application
 icon.filename = %(source.dir)s/images/wticon.png
+
 android.manifest_placeholders = receiverExported=false
 
 # (list) Supported orientations
@@ -85,7 +85,7 @@ fullscreen = 0
 # red, blue, green, black, white, gray, cyan, magenta, yellow, lightgray,
 # darkgray, grey, lightgrey, darkgrey, aqua, fuchsia, lime, maroon, navy,
 # olive, purple, silver, teal.
-#android.presplash_color = #FFFFFF
+android.presplash_color = #FFFFFF
 
 # (string) Presplash animation using Lottie format.
 # see https://lottiefiles.com/ for examples and https://airbnb.design/lottie/
@@ -210,7 +210,7 @@ android.accept_sdk_license = True
 # (bool) Enable AndroidX support. Enable when 'android.gradle_dependencies'
 # contains an 'androidx' package, or any package from Kotlin source.
 # android.enable_androidx requires android.api >= 28
-#android.enable_androidx = True
+android.enable_androidx = True
 
 # (list) add java compile options
 # this can for example be necessary when importing certain java libraries using the 'android.gradle_dependencies' option
