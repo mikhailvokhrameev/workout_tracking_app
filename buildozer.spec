@@ -51,7 +51,8 @@ presplash.filename = %(source.dir)s/images/presplash.png
 # (str) Icon of the application
 icon.filename = %(source.dir)s/images/wticon.png
 
-android.manifest_placeholders = receiverExported=false
+#android.manifest_placeholders = receiverExported=false
+android.manifest_placeholders = receiverExported: false
 
 # (list) Supported orientations
 # Valid options are: landscape, portrait, portrait-reverse or landscape-reverse
