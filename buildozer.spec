@@ -52,7 +52,7 @@ presplash.filename = %(source.dir)s/images/presplash.png
 icon.filename = %(source.dir)s/images/wticon.png
 
 #android.manifest_placeholders = receiverExported=false
-android.manifest_placeholders = receiverExported: false
+# android.manifest_placeholders = receiverExported: false
 
 # (list) Supported orientations
 # Valid options are: landscape, portrait, portrait-reverse or landscape-reverse
@@ -208,10 +208,10 @@ android.accept_sdk_license = True
 
 # (list) Gradle dependencies to add
 
-android.gradle_plugin = 7.4.2
-android.gradle_distribution_url = https://services.gradle.org/distributions/gradle-7.6-bin.zip
+#android.gradle_plugin = 7.4.2
+#android.gradle_distribution_url = https://services.gradle.org/distributions/gradle-7.6-bin.zip
 #android.gradle_dependencies = 
-android.gradle_dependencies = com.android.tools.build:gradle:7.4.2
+#android.gradle_dependencies = com.android.tools.build:gradle:7.4.2
 
 # (bool) Enable AndroidX support. Enable when 'android.gradle_dependencies'
 # contains an 'androidx' package, or any package from Kotlin source.
