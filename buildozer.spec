@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 [app]
 
 # (str) Title of your application
