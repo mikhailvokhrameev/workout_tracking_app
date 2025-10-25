@@ -52,7 +52,7 @@
             MDBoxLayout:
                 adaptive_height: True
                 spacing: '10dp'
-                padding: '20dp'
+                padding: '10dp'
 
                 MDTextField:
                     id: new_exercise_name
@@ -61,18 +61,14 @@
                     multiline: False
 
                     MDTextFieldHintText:
-                        text: "название упражнения"
+                        text: "упражнение"
                         text_color_normal: "grey"
 
                     MDTextFieldMaxLengthText:
                         max_text_length: 30
-                        # удалены spacing/padding, мешающие расчёту компоновки
-
-                    MDTextFieldHelperText:
-                        text: "Название не более 30 символов"
-                        mode: "on_error"
 
                 MDButton:
+                    pos_hint: {'center_y': 0.5}
                     style: "filled"
                     on_release: root.add_exercise()
                     MDButtonText:

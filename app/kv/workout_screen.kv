@@ -3,20 +3,21 @@
 <WorkoutSummaryContent>:
     orientation: 'vertical'
     size_hint_y: None
-    height: self.minimum_height
-    padding: "24dp", "20dp", "24dp", "16dp"
-    spacing: "16dp"
+    height: "300dp"
 
-    MDLabel:
-        id: content
-        text: root.summary_text
-        font_style: "Body"
-        role: "large"
-        markup: True
-        size_hint_y: None
-        height: self.texture_size[1]
-        padding: "4dp", "0dp"
-        text_size: self.width, None
+    MDScrollView:
+        do_scroll_x: False
+        
+        MDLabel:
+            id: content
+            text: root.summary_text
+            font_style: "Body"
+            role: "large"
+            markup: True
+            size_hint_y: None
+            height: self.texture_size[1]
+            #padding: "10dp", "10dp", "12dp", "8dp"
+            text_size: self.width, None
 
 
 <NewSetRow>:
@@ -77,37 +78,48 @@
 <ExpansionPanelItem>:
 
     MDExpansionPanelHeader:
-        MDListItem:
+        adaptive_height: True
+
+        MDBoxLayout:
+            adaptive_height: True
+            padding: "12dp", "12dp", "6dp", "12dp"
+            spacing: "12dp"
             ripple_effect: False
 
-            MDListItemHeadlineText:
-                text: root.exercise_name
-                size_hint_y: None
-                height: self.texture_size[1]
-                text_size: self.width, None
-                shorten: False
-                shorten_from: "right"
+            MDBoxLayout:
+                id: text_container
+                orientation: 'vertical'
+                adaptive_height: True
+                spacing: '4dp'
 
-            MDListItemSupportingText:
-                text: root.target_info
-                size_hint_y: None
-                height: self.texture_size[1]
-                text_size: self.width, None
-                shorten: False
-                shorten_from: "right"
+                MDListItemHeadlineText:
+                    text: root.exercise_name
+                    size_hint_y: None
+                    height: self.texture_size[1]
+                    text_size: self.width, None
+                    shorten: False
 
-            MDListItemTertiaryText:
-                text: root.last_workout_info
-                size_hint_y: None
-                height: self.texture_size[1]
-                text_size: self.width, None
-                shorten: False
-                shorten_from: "right"
+                MDListItemSupportingText:
+                    text: root.target_info
+                    size_hint_y: None
+                    height: self.texture_size[1]
+                    text_size: self.width, None
+                    shorten: False
+
+                MDListItemTertiaryText:
+                    text: root.last_workout_info
+                    size_hint_y: None
+                    height: self.texture_size[1]
+                    text_size: self.width, None
+                    shorten: False
 
             TrailingPressedIconButton:
                 id: chevron
                 icon: "chevron-right"
                 on_release: app.tap_expansion_chevron(root, self)
+                size_hint_x: None
+                width: "48dp"
+                pos_hint: {'center_y': .5}
 
     MDExpansionPanelContent:
         orientation: 'vertical'
@@ -147,8 +159,7 @@
             MDList:
                 id: today_workout_container
                 adaptive_height: True
-                padding: "8dp"
-                spacing: "8dp"
+                padding: "12dp"
         
         MDButton:
             id: save_workout_btn
