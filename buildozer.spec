@@ -46,7 +46,7 @@ requirements = python3, kivy==2.3.1,kivy_garden==0.1.5,kivy_garden.graph, git+ht
 # requirements.source.kivy = ../../kivy
 
 # (str) Presplash of the application
- presplash.filename = %(source.dir)s/images/presplash.png
+presplash.filename = %(source.dir)s/images/presplash.png
 
 # (str) Icon of the application
 icon.filename = %(source.dir)s/images/wticon.png
