@@ -3,7 +3,7 @@
 <WorkoutSummaryContent>:
     orientation: 'vertical'
     size_hint_y: None
-    height: "300dp"
+    height: "350dp"
 
     MDScrollView:
         do_scroll_x: False
@@ -16,9 +16,10 @@
             markup: True
             size_hint_y: None
             height: self.texture_size[1]
-            #padding: "10dp", "10dp", "12dp", "8dp"
+            padding: "24dp", "20dp", "24dp", "16dp"
             text_size: self.width, None
 
+<ClickableMDBoxLayout>:
 
 <NewSetRow>:
     adaptive_height: True
@@ -80,11 +81,11 @@
     MDExpansionPanelHeader:
         adaptive_height: True
 
-        MDBoxLayout:
+        ClickableMDBoxLayout:
             adaptive_height: True
-            padding: "12dp", "12dp", "6dp", "12dp"
-            spacing: "12dp"
-            ripple_effect: False
+            padding: "16dp", "16dp", "8dp", "16dp"
+            spacing: "16dp"
+            on_release: app.tap_expansion_chevron(root, chevron)
 
             MDBoxLayout:
                 id: text_container
@@ -113,10 +114,9 @@
                     text_size: self.width, None
                     shorten: False
 
-            TrailingPressedIconButton:
+            ChevronIcon:
                 id: chevron
                 icon: "chevron-right"
-                on_release: app.tap_expansion_chevron(root, self)
                 size_hint_x: None
                 width: "48dp"
                 pos_hint: {'center_y': .5}
@@ -124,18 +124,21 @@
     MDExpansionPanelContent:
         orientation: 'vertical'
         adaptive_height: True
+        padding: "8dp"
+        spacing: "8dp"
 
         MDBoxLayout:
             id: new_sets_container
             orientation: 'vertical'
             adaptive_height: True
             spacing: "4dp"
-            padding: "8dp"
 
         MDButton:
             on_release: root.add_set_row()
             pos_hint: {'center_x': 0.5}
             style: "filled"
+            size_hint_y: None
+            height: "48dp"
 
             MDButtonText:
                 text: "Добавить подход"
@@ -159,7 +162,8 @@
             MDList:
                 id: today_workout_container
                 adaptive_height: True
-                padding: "12dp"
+                padding: "20dp"
+                spacing: "30dp"
         
         MDButton:
             id: save_workout_btn
@@ -171,4 +175,3 @@
             
             MDButtonText:
                 text: "Сохранить тренировку"
-

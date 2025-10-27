@@ -22,13 +22,16 @@ from app.screens.workout_screen import (
     WorkoutScreen,
     NewSetRow,
     TrailingPressedIconButton,
-    ExpansionPanelItem
+    ExpansionPanelItem,
+    ClickableMDBoxLayout
 )
 from app.screens.graph_screen import GraphScreen
 from app.screens.progressive_overload_screen import ProgressiveOverloadScreen
 
 Window.keyboard_anim_args = {"d": .2, "t": "in_out_quart"}
 Window.softinput_mode = "below_target"
+
+Window.size = (359, 751)  # For testing on desktop
 
 class MainApp(MDApp):
     def build(self):
@@ -68,6 +71,16 @@ class MainApp(MDApp):
         panel: MDExpansionPanel,
         chevron: TrailingPressedIconButton,
     ):
+        
+        if getattr(panel, '_is_animating', False):
+            return
+        panel._is_animating = True
+        
+        def reenable_panel(*args):
+            panel._is_animating = False
+
+        Clock.schedule_once(reenable_panel, 0.5)
+        
         if panel.is_open:
             panel.close()
             panel.set_chevron_up(chevron)
