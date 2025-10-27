@@ -31,7 +31,7 @@ from app.screens.progressive_overload_screen import ProgressiveOverloadScreen
 Window.keyboard_anim_args = {"d": .2, "t": "in_out_quart"}
 Window.softinput_mode = "below_target"
 
-Window.size = (359, 751)  # For testing on desktop
+#Window.size = (359, 751)
 
 class MainApp(MDApp):
     def build(self):
