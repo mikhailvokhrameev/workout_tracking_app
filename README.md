@@ -1,4 +1,10 @@
+[![Android Build](https://github.com/mikhailvokhrameev/workout_tracking_app/actions/workflows/Buildozer%20Action.yml/badge.svg)](https://github.com/mikhailvokhrameev/workout_tracking_app/actions/workflows/Buildozer%20Action.yml)
+
 # Мобильное приложение для отслеживания силовых тренировок с расчетом прогрессивной перегрузки
+
+<div align="center">
+<img src="https://github.com/user-attachments/assets/a4f19605-3626-41fb-8151-b996f6f73963" width="150"><br>
+</div>
 
 
 Данный репозиторий содержит приложение, которое предназначено для автоматизации процесса планирования и отслеживания силовых тренировок на основе принципа прогрессивной перегрузки. Использовать приложение могут люди, которые занимаются спортом как на любительском, так и на профессиональном уровне.
@@ -21,7 +27,24 @@
 В рамках приложения реализовано **3 вида прогрессивной перегрузки**:
 * Двойная прогрессия (Double Progression)
 * Линейная прогрессия (Linear Progression)
-* Прогрессия по диапазону повторений (Rep Range Progression)
+
+---
+### Краткий обзор основных функций
+
+#### Создание тренировочной программы:
+<img src="https://github.com/user-attachments/assets/a249a4d3-6c30-4ae0-849b-d751bf028b5e" width="200"><br>
+
+#### Добавление упражнений в программу:
+<img src="https://github.com/user-attachments/assets/aa9f57a0-524d-4cf6-86d6-70ae6f887621" width="200"><br>
+
+#### Запись тренировки:
+<img src="https://github.com/user-attachments/assets/cea3a130-288e-44d4-bba5-250c69f57ae2" width="200"><br>
+
+#### Просмотр и редактирование истории тренировок:
+<img src="https://github.com/user-attachments/assets/c04c65d0-8cc8-42d0-a7b2-19ff44df8157" width="200"><br>
+
+#### Просмотр графиков 1ПМ для любого упражнения:
+<img src="https://github.com/user-attachments/assets/70bd01a0-006f-4dff-b007-7d2df06e954d" width="200"><br>
 
 ---
 
