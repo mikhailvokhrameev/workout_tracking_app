@@ -1,42 +1,42 @@
 [![Android Build](https://github.com/mikhailvokhrameev/workout_tracking_app/actions/workflows/Buildozer%20Action.yml/badge.svg)](https://github.com/mikhailvokhrameev/workout_tracking_app/actions/workflows/Buildozer%20Action.yml)
 
-# Мобильное приложение для отслеживания силовых тренировок с расчетом прогрессивной перегрузки
+# Mobile App for Tracking Strength Workouts with Progressive Overload Calculation
 
 <div align="center">
 <img src="https://github.com/user-attachments/assets/a4f19605-3626-41fb-8151-b996f6f73963" width="150"><br>
 </div>
 
-Данный репозиторий содержит приложение, которое предназначено для автоматизации процесса планирования и отслеживания силовых тренировок на основе принципа прогрессивной перегрузки. Использовать приложение могут люди, которые занимаются спортом как на любительском, так и на профессиональном уровне.
+This repository contains an application designed to automate the process of planning and tracking strength training based on the principle of progressive overload. The application can be used by individuals participating in sports at both amateur and professional levels.
 
 ---
 
-### Почему я делал этот проект?
+### Why did I build this project?
 
-Мне хотелось разобраться с процессом разработки полноценного приложения на `Python` и запустить его на мобильном устройстве.
-Мне удалось реализовать базу, на основе которой я буду в дальнейшем проводить свои эксперименты в сфере Deep Learning, путем интегрирования ИИ функций в приложение.
+I wanted to understand the process of developing a full-featured application in `Python` and launching it on a mobile device.
+I managed to implement a foundation upon which I will conduct my future experiments in Deep Learning by integrating AI features into the app.
 
 ---
 
-### Что такое прогрессивная перегрузка?
+### What is progressive overload?
 
-Это фундаментальный принцип силовых тренировок, который заключается в постепенном увеличении нагрузки на мышцы, чтобы они становились сильнее и больше. **Без постоянного вызова тело человека не будет иметь причин для адаптации.**
+It is a fundamental principle of strength training that involves gradually increasing the stress placed upon the muscles so that they become stronger and larger. **Without a constant challenge, the human body will have no reason to adapt.**
 
-**Основная цель** — избежать плато в тренировках. Если выполнять одни и те же упражнения с одинаковым весом и повторениями, тело быстро адаптируется, и прогресс остановится. Прогрессия заставляет мышцы работать усерднее, что стимулирует их гипертрофию и увеличение силы.
+**The main goal** is to avoid training plateaus. If you perform the same exercises with the same weight and reps, the body quickly adapts, and progress stops. Progression forces the muscles to work harder, stimulating hypertrophy and strength gains.
 
-В рамках приложения реализовано **3 вида прогрессивной перегрузки**:
-* Двойная прогрессия (Double Progression)
-* Линейная прогрессия (Linear Progression)
+The app implements **3 types of progressive overload**:
+* Double Progression
+* Linear Progression
 
-| Функция                                          | Демонстрация                                                                                                                                                                                          |
+| Feature | Demonstration |
 | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Создание тренировочной программы**             | <a href="https://github.com/user-attachments/assets/a249a4d3-6c30-4ae0-849b-d751bf028b5e"><img src="https://github.com/user-attachments/assets/a249a4d3-6c30-4ae0-849b-d751bf028b5e" width="200"></a> |
-| **Добавление упражнений в программу**            | <a href="https://github.com/user-attachments/assets/aa9f57a0-524d-4cf6-86d6-70ae6f887621"><img src="https://github.com/user-attachments/assets/aa9f57a0-524d-4cf6-86d6-70ae6f887621" width="200"></a> |
-| **Запись тренировки**                            | <a href="https://github.com/user-attachments/assets/cea3a130-288e-44d4-bba5-250c69f57ae2"><img src="https://github.com/user-attachments/assets/cea3a130-288e-44d4-bba5-250c69f57ae2" width="200"></a> |
-| **Просмотр и редактирование истории тренировок** | <a href="https://github.com/user-attachments/assets/c04c65d0-8cc8-42d0-a7b2-19ff44df8157"><img src="https://github.com/user-attachments/assets/c04c65d0-8cc8-42d0-a7b2-19ff44df8157" width="200"></a> |
-| **Просмотр графиков 1ПМ для упражнения**         | <a href="https://github.com/user-attachments/assets/70bd01a0-006f-4dff-b007-7d2df06e954d"><img src="https://github.com/user-attachments/assets/70bd01a0-006f-4dff-b007-7d2df06e954d" width="200"></a> |
+| **Creating a workout program** | <a href="https://github.com/user-attachments/assets/a249a4d3-6c30-4ae0-849b-d751bf028b5e"><img src="https://github.com/user-attachments/assets/a249a4d3-6c30-4ae0-849b-d751bf028b5e" width="200"></a> |
+| **Adding exercises to a program** | <a href="https://github.com/user-attachments/assets/aa9f57a0-524d-4cf6-86d6-70ae6f887621"><img src="https://github.com/user-attachments/assets/aa9f57a0-524d-4cf6-86d6-70ae6f887621" width="200"></a> |
+| **Logging a workout** | <a href="https://github.com/user-attachments/assets/cea3a130-288e-44d4-bba5-250c69f57ae2"><img src="https://github.com/user-attachments/assets/cea3a130-288e-44d4-bba5-250c69f57ae2" width="200"></a> |
+| **Viewing and editing workout history** | <a href="https://github.com/user-attachments/assets/c04c60d0-8cc8-42d0-a7b2-19ff44df8157"><img src="https://github.com/user-attachments/assets/c04c60d0-8cc8-42d0-a7b2-19ff44df8157" width="200"></a> |
+| **Viewing 1RM charts for an exercise** | <a href="https://github.com/user-attachments/assets/70bd01a0-006f-4dff-b007-7d2df06e954d"><img src="https://github.com/user-attachments/assets/70bd01a0-006f-4dff-b007-7d2df06e954d" width="200"></a> |
 
 
-### Зависимости:
+### Dependencies:
 
 - **Python 3.12.4**
 - **Kivy 2.3.1**
@@ -46,28 +46,28 @@
 
 ---
 
-### Структура проекта
+### Project Structure
 
 ```
 workout_tracking_app/
 ├── app/
 ├── kv/
-│   ├── components.kv --> некоторые UI компоненты
+│   ├── components.kv --> some UI components
 │   ├── graph_screen.kv
 │   ├── history_screen.kv
 │   ├── program_detail_screen.kv
 │   ├── programs_screen.kv
 │   ├── progressive_overload_screen.kv
 │   ├── workout_screen.kv
-│   └── main_screen.kv --> организации навигации по разным экранам приложения
+│   └── main_screen.kv --> organizing navigation across different app screens
 ├── logic/
-│   ├── components.py --> некоторые UI компоненты
-│   ├── storage.py --> чтение/запись JSON, контейнер данных приложения
-│   ├── models.py --> типизированные модели и помощники
+│   ├── components.py --> some UI components
+│   ├── storage.py --> reading/writing JSON, app data container
+│   ├── models.py --> typed models and helpers
 │   ├── progression.py
-│   ├── services.py --> CRUD для программы/упражнения, сохранение/summary тренировок, история, графики
+│   ├── services.py --> CRUD for program/exercise, saving/summary of workouts, history, charts
 │   ├── session_state.py
-│   └── logic.py --> фасад
+│   └── logic.py --> facade
 ├── screens/
 │   ├── __init__.py
 │   ├── graph_screen.py
@@ -76,9 +76,9 @@ workout_tracking_app/
 │   ├── programs_screen.py
 │   ├── progressive_overload_screen.py
 │   ├── workout_screen.py
-│   ├── main_screen.py --> организации навигации по разным экранам приложения
+│   └── main_screen.py --> organizing navigation across different app screens
 ├──   __init__.py
-├──   main.py --> главный файл, запускает приложение
+├──   main.py --> main file, launches the app
 ├──   .gitignore
 ├──   README.md
 └──   requirements.txt
@@ -86,40 +86,40 @@ workout_tracking_app/
 
 ---
 
-### Установка
+### Installation
 
-Для настройки среды проекта выполните следующее:
+To set up the project environment, follow these steps:
 
-1.  **Клонируйте репозиторий:**
-    ```bash
-    git clone https://github.com/mikhailvokhrameev/workout_tracking_app.git
-    cd workout_tracking_app
-    ```
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/mikhailvokhrameev/workout_tracking_app.git
+   cd workout_tracking_app
+   ```
 
-2.  **Создайте и активируйте виртуальное окружение (рекомендуется):**
-    ```bash
-    # Создание окружения
-    python3 -m venv venv
+2. **Create and activate a virtual environment (recommended):**
+   ```bash
+   # Create environment
+   python3 -m venv venv
 
-    # Активация на macOS/Linux:
-    source venv/bin/activate
+   # Activation on macOS/Linux:
+   source venv/bin/activate
 
-    # Активация на Windows:
-    venv\Scripts\activate
-    ```
+   # Activation on Windows:
+   venv\Scripts\activate
+   ```
 
-3.  **Установите:**
-    ```bash
-    pip install -r requirements.txt
-    ```
+3. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
 ---
 
-### Использование
+### Usage
 
-**Важно:** Все команды должны запускаться из корневой папки проекта.
+**Important:** All commands must be run from the root directory of the project.
 
-1. Находясь в корневой папке проекта, запустите `main.py`:
+1. Being in the root directory of the project, run `main.py`:
 
 ```bash
 python main.py
