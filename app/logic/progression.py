@@ -21,27 +21,6 @@ def calculate_next_target(exercise: Dict[str, Any], last_workout: Optional[Dict[
             }
         return result
 
-    # if progression_type == "linear":
-    #     qualifying_weights = [float(s["weight"]) for s in last_working_sets if s.get("reps", 0) >= 12]
-    #     if qualifying_weights:
-    #         base_weight = max(qualifying_weights)
-    #     else:
-    #         all_weights = [float(s.get("weight", 0)) for s in last_working_sets]
-    #         base_weight = max(all_weights) if all_weights else 0
-
-    #     has_existing_target = exercise.get("nextTarget") and exercise["nextTarget"].get("weight")
-
-    #     if not has_existing_target:
-    #         new_weight = base_weight
-    #     else:
-    #         weight_increment = 2.5 if base_weight > 40 else 1.25
-    #         new_weight = round((base_weight + weight_increment) * 4) / 4
-
-    #     result = {
-    #         "weight": new_weight, "sets": 3, "reps": 12, "text": "3 подхода по 12 повторений"
-    #     }
-        
-    #     return result
     if progression_type == "linear":
         first_three = last_working_sets[:3]
 

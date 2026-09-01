@@ -206,3 +206,8 @@ __marimo__/
 *.json
 
 tempCodeRunnerFile.py
+
+# App runtime database + migration backup (user data, not source)
+*.db
+*.db-journal
+app_data.json.bak

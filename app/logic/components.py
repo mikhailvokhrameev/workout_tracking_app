@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-
+from kivy.metrics import dp
 from kivy.properties import StringProperty, ObjectProperty, BooleanProperty
 from kivymd.app import MDApp
 from kivymd.uix.navigationbar import MDNavigationItem
@@ -34,7 +33,8 @@ class SettingsTopAppBar(MDBoxLayout):
                     }
                 ],
                 width_mult=4,
-                position="auto",
+                position="bottom",
+                max_height=dp(224),
             )
         self._menu.open()
 

@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-
 from __future__ import annotations
-
 from kivymd.app import MDApp
 from kivymd.uix.screen import MDScreen
 from kivy.properties import ObjectProperty, StringProperty, BooleanProperty
@@ -28,14 +25,12 @@ from app.logic.progression import calculate_next_target
 def _logic():
     return MDApp.get_running_app().logic
 
-
 def _session_snapshot():
     return _logic().get_current_workout_state()
 
 
 class WorkoutSummaryContent(MDBoxLayout):
     summary_text = StringProperty("")
-
 
 class NewSetRow(MDBoxLayout):
     exercise_id = ObjectProperty(None)
@@ -44,6 +39,7 @@ class NewSetRow(MDBoxLayout):
     reps = StringProperty('')
     panel_ref = ObjectProperty(None)
     set_number = StringProperty('')
+
     weight_error = BooleanProperty(False)
     reps_error = BooleanProperty(False)
 
@@ -70,7 +66,9 @@ class NewSetRow(MDBoxLayout):
             is_valid = False
 
         target_property = f"{property_name}_error"
+
         setattr(self, target_property, False)
+
         if not is_valid:
             Clock.schedule_once(lambda dt: setattr(self, target_property, True), 0)
 
@@ -82,43 +80,51 @@ class TrailingPressedIconButton(ButtonBehavior, RotateBehavior, MDListItemTraili
     pass
 
 
-class ClickableMDBoxLayout(ButtonBehavior, MDBoxLayout):
-    pass
-
-
-class ChevronIcon(RotateBehavior, MDListItemTrailingIcon):
-    pass
-
-
 class ExpansionPanelItem(MDExpansionPanel):
     exercise_id = ObjectProperty(None)
     exercise_name = StringProperty("")
     target_info = StringProperty("")
     last_workout_info = StringProperty("")
 
+    def on_kv_post(self, base_widget):
+        # KivyMD's own initial height capture (MDExpansionPanelContent's
+        # add_widget -> Clock.schedule_once(self._set_content_height, 0.8))
+        # is scheduled a fixed 0.8s after construction. add_set_row's own
+        # sync covers exercises that already have sets by the time this
+        # panel is built, but a brand-new exercise with zero sets never
+        # calls add_set_row here, so _original_content_height stays at its
+        # unmeasured default until that 0.8s callback fires. Tapping to
+        # expand before then uses a stale height and the content overflows.
+        # Schedule our own (much faster, next-frame) sync unconditionally so
+        # every panel is correct well before a human can plausibly tap it.
+        Clock.schedule_once(self._sync_content_height, 0)
+
+    def _set_content_height(self, *args):
+        # Override KivyMD's own version (kivymd/uix/expansionpanel/
+        # expansionpanel.py), which unconditionally does
+        # `self._content.height = 0` here regardless of whether the panel
+        # has since been opened. That 0.8s callback still fires even if the
+        # user already expanded the panel well within that window (easy now
+        # that the whole cell is tappable) — forcibly zeroing an
+        # already-visible panel's height out from under it corrupts the
+        # layout: the header and the still-rendered-but-now-heightless
+        # content overlap. Delegate to our own sync, which only writes a
+        # live height when the panel is actually open, and never blindly
+        # collapses it.
+        self._sync_content_height(*args)
+
     def on_open(self, *args):
-        temp_row = self.add_set_row(return_row=True)
-        if temp_row is not None:
-            Clock.schedule_once(lambda dt: self.remove_set_row(temp_row), 0)
-        Clock.schedule_once(lambda dt: self._force_layout_update_chain(), 0.2)
+        if not self.ids.new_sets_container.children:
+            self.add_set_row()
 
-    def _force_layout_update_chain(self):
-        try:
-            if hasattr(self, "ids") and "new_sets_container" in self.ids:
-                cont = self.ids.new_sets_container
-                if hasattr(cont, "do_layout"):
-                    cont.do_layout()
-            if self.parent and hasattr(self.parent, "do_layout"):
-                self.parent.do_layout()
-            if self.parent and self.parent.parent and hasattr(self.parent.parent, "do_layout"):
-                self.parent.parent.do_layout()
-        except Exception:
-            pass
-
-    def add_set_row(self, set_data=None, return_row: bool = False):
+    def add_set_row(self, set_data=None):
         logic = _logic()
         exercise_id = self.exercise_id
         current_sets_count = len(self.ids.new_sets_container.children)
+        if current_sets_count >= 5:
+            print("Достигнуто ограничение в 5 подходов")
+            return
+
         set_number = str(current_sets_count + 1)
 
         if set_data:
@@ -129,7 +135,7 @@ class ExpansionPanelItem(MDExpansionPanel):
             logic.add_set_to_workout(exercise_id)
             sets_for_ex = _session_snapshot().get(exercise_id, [])
             if not sets_for_ex:
-                return None if return_row else None
+                return
             new_set = sets_for_ex[-1]
             set_id = new_set["id"]
             weight, reps = "", ""
@@ -143,26 +149,40 @@ class ExpansionPanelItem(MDExpansionPanel):
         )
         set_row.set_number = set_number
         self.ids.new_sets_container.add_widget(set_row)
-
-        Clock.schedule_once(lambda dt: self._force_layout_update_chain(), 0.05)
-
-        return set_row if return_row else None
+        Clock.schedule_once(self._sync_content_height, 0)
 
     def remove_set_row(self, set_row):
-        try:
-            _logic().delete_set_from_workout(set_row.exercise_id, set_row.set_id)
-        except Exception:
-            pass
+        _logic().delete_set_from_workout(set_row.exercise_id, set_row.set_id)
+        self.ids.new_sets_container.remove_widget(set_row)
+        self._renumber_sets()
+        Clock.schedule_once(self._sync_content_height, 0)
 
-        if set_row.parent:
-            set_row.parent.remove_widget(set_row)
+    def _sync_content_height(self, *args):
+        # NewSetRow widgets are added to new_sets_container, a child nested
+        # one level inside MDExpansionPanelContent — KivyMD's own
+        # MDExpansionPanelContent.add_widget only auto-refreshes
+        # _original_content_height for its DIRECT children, so additions to
+        # new_sets_container never trigger it. Without this, the panel keeps
+        # animating to a stale (too-small) height and new rows overflow past
+        # the box, overlapping whatever is below. Reuse KivyMD's own public
+        # recompute method, then live-sync if already open so the fix is
+        # visible immediately, not just on the next open().
+        self._update_original_content_height(self._content)
+        if self.is_open:
+            self._content.height = self._original_content_height
 
-        Clock.schedule_once(lambda dt: self._force_layout_update_chain(), 0.05)
+    def _renumber_sets(self):
+        # Kivy stacks children in reverse insertion order, so reverse to get
+        # top-to-bottom visual order before relabeling.
+        rows = list(reversed(self.ids.new_sets_container.children))
+        for index, row in enumerate(rows):
+            row.set_number = str(index + 1)
 
 
 class WorkoutScreen(MDScreen):
     dialog = None
     pending_workout_data = None
+    _submitting = False
 
     def on_enter(self, *args):
         Clock.schedule_once(self.render_todays_workout)
@@ -173,7 +193,6 @@ class WorkoutScreen(MDScreen):
         container.clear_widgets()
 
         active_program = logic.get_active_program()
-
         if not active_program:
             placeholder = MDLabel(
                 text="Нет активной программы",
@@ -188,13 +207,14 @@ class WorkoutScreen(MDScreen):
 
         for ex in active_program["exercises"]:
             last_workout = logic.get_last_workout_for_exercise(ex['id'])
+
             next_target = calculate_next_target(ex, last_workout, progression_type)
 
             last_workout_text = ""
             if last_workout:
                 sets_list = last_workout.get("sets", [])
                 last_workout_text = ("Прошлая: " + ", ".join([f"{s['reps']}x{s['weight']}кг" for s in sets_list])
-                                     if sets_list else "Прошлая тренировка без рабочих подходов")
+                                if sets_list else "Прошлая тренировка без рабочих подходов")
             else:
                 last_workout_text = "Это первая тренировка!"
 
@@ -208,6 +228,7 @@ class WorkoutScreen(MDScreen):
                 else:
                     target_text = f"Цель: {base_text}"
 
+
             panel = ExpansionPanelItem(
                 exercise_id=ex["id"],
                 exercise_name=ex["name"],
@@ -219,6 +240,7 @@ class WorkoutScreen(MDScreen):
                 panel.add_set_row(set_data=s)
 
             container.add_widget(panel)
+
 
     def _collect_ui_data(self):
         logic = _logic()
@@ -233,6 +255,8 @@ class WorkoutScreen(MDScreen):
                     )
 
     def show_save_confirmation_dialog(self):
+        if self._submitting:
+            return
         logic = _logic()
 
         if logic.has_validation_errors():
@@ -260,12 +284,10 @@ class WorkoutScreen(MDScreen):
 
         snapshot = _session_snapshot()
         saved_exercises_data = []
-
         for exercise in active_program["exercises"]:
             exercise_id = exercise["id"]
             workout_sets = snapshot.get(exercise_id, [])
             sets_to_save = []
-
             for s in workout_sets:
                 if str(s.get("weight", "")).strip() and str(s.get("reps", "")).strip():
                     try:
@@ -274,7 +296,6 @@ class WorkoutScreen(MDScreen):
                         )
                     except (ValueError, TypeError):
                         continue
-
             if sets_to_save:
                 exercise_with_program_id = exercise.copy()
                 exercise_with_program_id["programId"] = active_program["id"]
@@ -290,13 +311,12 @@ class WorkoutScreen(MDScreen):
             return
 
         self.pending_workout_data = saved_exercises_data
+        self._submitting = True
 
         summary_data = logic.generate_workout_summary(self.pending_workout_data)
-
         final_text = ""
         if not summary_data["all_goals_achieved"]:
             final_text += "Ничего страшного! Результаты оказались чуть ниже ожидаемых.\n\n"
-
         final_text += "[b]Детали прогресса:[/b]\n\n"
         for detail in summary_data["details"]:
             final_text += f"{detail['exercise_name']}: {detail['message']}\n"
@@ -304,7 +324,6 @@ class WorkoutScreen(MDScreen):
 
         if self.dialog:
             self.dialog.dismiss()
-
         self.dialog = MDDialog(
             MDDialogHeadlineText(text="Сохранить тренировку?"),
             MDDialogContentContainer(
@@ -338,11 +357,9 @@ class WorkoutScreen(MDScreen):
 
         snapshot = _session_snapshot()
         saved_exercises_data = []
-
         for exercise in active_program["exercises"]:
             workout_sets = snapshot.get(exercise["id"], [])
             sets_to_save = []
-
             for s in workout_sets:
                 if str(s.get("weight", "")).strip() and str(s.get("reps", "")).strip():
                     try:
@@ -351,7 +368,6 @@ class WorkoutScreen(MDScreen):
                         )
                     except (ValueError, TypeError):
                         continue
-
             if sets_to_save:
                 exercise_with_program_id = exercise.copy()
                 exercise_with_program_id["programId"] = active_program["id"]
@@ -364,12 +380,12 @@ class WorkoutScreen(MDScreen):
             return
 
         logic.save_workout(saved_exercises_data)
+
         MDApp.get_running_app().switch_to_screen("history")
 
     def save_and_close_dialog(self, *args):
         if self.dialog:
             self.dialog.dismiss()
-
         if self.pending_workout_data:
             logic = _logic()
             app = MDApp.get_running_app()
@@ -378,8 +394,10 @@ class WorkoutScreen(MDScreen):
             app.switch_to_screen("history")
         else:
             print("Нет данных для сохранения.")
+        self._submitting = False
 
     def close_dialog(self, *args):
         if self.dialog:
             self.dialog.dismiss()
             self.dialog = None
+        self._submitting = False

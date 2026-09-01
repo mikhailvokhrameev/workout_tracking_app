@@ -2,42 +2,52 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
-from app.logic.models import get_active_program, get_program_by_id, find_exercise_by_id, get_last_workout_for_exercise as find_last_workout_in_history
+from app.logic.database import open_database
+from app.logic.repositories import ProgramRepository, SettingsRepository, WorkoutRepository
 from app.logic.services import WorkoutService
 from app.logic.session_state import SessionState
-from app.logic.storage import AppStorage
 
 
 class ProgressiveOverloadLogic:
-    def __init__(self, data_file: str = "app_data.json") -> None:
-        self.storage = AppStorage(data_file)
-        self.storage.load()
+    def __init__(
+        self,
+        db_path: str = "workout_tracker.db",
+        json_path: str = "app_data.json",
+        on_error: Optional[Callable[[str], None]] = None,
+    ) -> None:
+        self.conn = open_database(db_path, json_path)
 
-        app_data = self.storage.get()
-        if app_data.get("userSetupComplete"):
-            if app_data.get("programs") and not app_data.get("activeProgramId"):
-                app_data["activeProgramId"] = app_data["programs"][0]["id"]
+        self.program_repo = ProgramRepository(self.conn)
+        self.workout_repo = WorkoutRepository(self.conn)
+        self.settings_repo = SettingsRepository(self.conn)
+
+        if self.settings_repo.get_user_setup_complete():
+            programs = self.program_repo.list_programs()
+            if programs and not self.settings_repo.get_active_program_id():
+                self.settings_repo.set_active_program_id(programs[0].id)
 
         self.session = SessionState()
-        self.service = WorkoutService(self.storage, self.session)
+        self.service = WorkoutService(
+            self.program_repo, self.workout_repo, self.settings_repo, self.session, on_error=on_error
+        )
 
         self.service.init_current_workout()
 
     # helpers
 
     def get_active_program(self) -> Optional[Dict[str, Any]]:
-        return get_active_program(self.storage.get())
+        return self.service.get_active_program_dict()
 
     def get_program_by_id(self, program_id: int) -> Optional[Dict[str, Any]]:
-        return get_program_by_id(self.storage.get(), program_id)
+        return self.service.get_program_by_id_dict(program_id)
 
     def find_exercise_by_id(self, exercise_id: int) -> Optional[Dict[str, Any]]:
-        return find_exercise_by_id(self.storage.get(), exercise_id)
-    
+        return self.service.find_exercise_by_id_dict(exercise_id)
+
     def get_last_workout_for_exercise(self, exercise_id: int) -> Optional[Dict[str, Any]]:
-        return find_last_workout_in_history(self.storage.get(), exercise_id)
+        return self.service.get_last_workout_for_exercise_dict(exercise_id)
 
     # CRUD
 
@@ -69,16 +79,16 @@ class ProgressiveOverloadLogic:
 
     def update_set_in_workout(self, exercise_id: int, set_id: int, property_name: str, value: str) -> None:
         self.service.update_set_in_workout(exercise_id, set_id, property_name, value)
-    
+
     def get_current_workout_state(self):
         state = self.service.session.current_workout_state
         return {ex_id: list(sets) for ex_id, sets in state.items()}
-    
+
     def list_programs(self):
-        return [dict(p) for p in self.storage.get().get("programs", [])]
-    
+        return self.service.list_programs_dicts()
+
     def list_workout_history(self):
-        return [dict(s) for s in self.storage.get().get("workoutHistory", [])]
+        return self.service.list_workout_history_dicts()
 
     # validation support for ui
 
@@ -100,7 +110,7 @@ class ProgressiveOverloadLogic:
 
     def delete_history_session(self, session_id: int) -> None:
         self.service.delete_history_session(session_id)
-        
+
     def reset_all_data(self) -> None:
         self.service.reset_all_data()
 
@@ -108,5 +118,3 @@ class ProgressiveOverloadLogic:
 
     def get_progress_chart_data(self, exercise_id: int) -> Optional[Dict[str, List]]:
         return self.service.get_progress_chart_data(exercise_id)
-
-    
