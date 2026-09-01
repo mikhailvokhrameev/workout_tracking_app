@@ -71,6 +71,9 @@ class WorkoutService:
         self.settings_repo = settings_repo
         self.session = session
         self.on_error = on_error or (lambda message: None)
+        # All three repositories share one connection (see repositories.py) —
+        # kept here directly so storage_errors can roll it back on failure.
+        self.conn = program_repo.conn
 
     def _handle_write_error(self, exc: StorageWriteError) -> None:
         self.on_error(str(exc))
@@ -114,7 +117,7 @@ class WorkoutService:
             return
         program_id = int(time.time() * 1000)
         try:
-            with storage_errors("create_new_program", name=name):
+            with storage_errors("create_new_program", self.conn, name=name):
                 self.program_repo.create_program(program_id, name, progression_type)
                 self.settings_repo.set_active_program_id(program_id)
         except StorageWriteError as exc:
@@ -127,7 +130,7 @@ class WorkoutService:
         if len(programs) <= 1:
             return False
         try:
-            with storage_errors("delete_program", program_id=program_id):
+            with storage_errors("delete_program", self.conn, program_id=program_id):
                 self.program_repo.delete_program(program_id)
                 if self.settings_repo.get_active_program_id() == program_id:
                     remaining = self.program_repo.list_programs()
@@ -140,7 +143,7 @@ class WorkoutService:
 
     def select_program(self, program_id: int) -> None:
         try:
-            with storage_errors("select_program", program_id=program_id):
+            with storage_errors("select_program", self.conn, program_id=program_id):
                 self.settings_repo.set_active_program_id(program_id)
         except StorageWriteError as exc:
             self._handle_write_error(exc)
@@ -153,7 +156,7 @@ class WorkoutService:
             return
         exercise_id = int(time.time() * 1000)
         try:
-            with storage_errors("add_exercise_to_active_program", name=name):
+            with storage_errors("add_exercise_to_active_program", self.conn, name=name):
                 self.program_repo.add_exercise(active_program.id, exercise_id, name)
         except StorageWriteError as exc:
             self._handle_write_error(exc)
@@ -166,7 +169,7 @@ class WorkoutService:
         if not active_program:
             return
         try:
-            with storage_errors("delete_exercise_from_active", exercise_id=exercise_id):
+            with storage_errors("delete_exercise_from_active", self.conn, exercise_id=exercise_id):
                 self.program_repo.delete_exercise(exercise_id)
         except StorageWriteError as exc:
             self._handle_write_error(exc)
@@ -253,7 +256,7 @@ class WorkoutService:
         )
 
         try:
-            with storage_errors("save_workout", program_id=active_program.id):
+            with storage_errors("save_workout", self.conn, program_id=active_program.id):
                 for exercise_id, next_target in target_updates.items():
                     self.program_repo.update_next_target(exercise_id, next_target)
                 self.workout_repo.save_workout(workout_session)
@@ -321,7 +324,7 @@ class WorkoutService:
 
     def delete_history_session(self, session_id: int) -> None:
         try:
-            with storage_errors("delete_history_session", session_id=session_id):
+            with storage_errors("delete_history_session", self.conn, session_id=session_id):
                 self.workout_repo.delete_history_session(session_id)
 
                 active_program = self.get_active_program()
@@ -359,7 +362,7 @@ class WorkoutService:
 
     def reset_all_data(self) -> None:
         try:
-            with storage_errors("reset_all_data"):
+            with storage_errors("reset_all_data", self.conn):
                 self.settings_repo.reset_all()
         except StorageWriteError as exc:
             self._handle_write_error(exc)
