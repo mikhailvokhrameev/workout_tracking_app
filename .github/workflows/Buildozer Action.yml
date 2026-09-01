@@ -36,9 +36,18 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .buildozer
-          key: ${{ runner.os }}-buildozer-app
+          # Keyed on buildozer.spec's content, not a static string. p4a's
+          # per-target build directories (e.g. other_builds/python3/
+          # arm64-v8a__ndk_target_23) get reused verbatim from a restored
+          # cache even when android.minapi/android.api change, silently
+          # rebuilding against the OLD target — a static key masked the
+          # android.minapi 23->24 fix (still compiled against android23-clang
+          # after the bump). restore-keys still allows a same-spec run to
+          # partially reuse the previous cache; a spec change gets a full
+          # cache miss and a clean rebuild against the new settings.
+          key: ${{ runner.os }}-buildozer-app-${{ hashFiles('buildozer.spec') }}
           restore-keys: |
-            ${{ runner.os }}-buildozer-app
+            ${{ runner.os }}-buildozer-app-
 
       - name: Cache Android SDK
         uses: actions/cache@v4
