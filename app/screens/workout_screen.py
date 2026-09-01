@@ -86,6 +86,19 @@ class ExpansionPanelItem(MDExpansionPanel):
     target_info = StringProperty("")
     last_workout_info = StringProperty("")
 
+    def on_kv_post(self, base_widget):
+        # KivyMD's own initial height capture (MDExpansionPanelContent's
+        # add_widget -> Clock.schedule_once(self._set_content_height, 0.8))
+        # is scheduled a fixed 0.8s after construction. add_set_row's own
+        # sync covers exercises that already have sets by the time this
+        # panel is built, but a brand-new exercise with zero sets never
+        # calls add_set_row here, so _original_content_height stays at its
+        # unmeasured default until that 0.8s callback fires. Tapping to
+        # expand before then uses a stale height and the content overflows.
+        # Schedule our own (much faster, next-frame) sync unconditionally so
+        # every panel is correct well before a human can plausibly tap it.
+        Clock.schedule_once(self._sync_content_height, 0)
+
     def on_open(self, *args):
         if not self.ids.new_sets_container.children:
             self.add_set_row()
