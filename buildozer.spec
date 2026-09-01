@@ -109,7 +109,13 @@ android.presplash_color = 0xffffffff
 android.api = 34
 
 # (int) Minimum API your APK / AAB will support.
-android.minapi = 23
+# 24, not 23: CPython 3.13+'s Python/remote_debugging.c (PEP 768) calls
+# preadv()/pwritev(), which Android's bionic libc only declares starting at
+# API 24 (https://github.com/aosp-mirror/platform_bionic/blob/master/android-changes-for-ndk-developers.md).
+# At minapi=23, the p4a python3 recipe fails to compile with "call to
+# undeclared function 'preadv'" under modern strict Clang. API 23 is
+# Android 6.0 (2015) with negligible real-world share; this costs nothing.
+android.minapi = 24
 
 # (int) Android SDK version to use
 #android.sdk = 20
