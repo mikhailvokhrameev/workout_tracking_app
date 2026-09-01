@@ -155,6 +155,7 @@ class ExpansionPanelItem(MDExpansionPanel):
 class WorkoutScreen(MDScreen):
     dialog = None
     pending_workout_data = None
+    _submitting = False
 
     def on_enter(self, *args):
         Clock.schedule_once(self.render_todays_workout)
@@ -227,6 +228,8 @@ class WorkoutScreen(MDScreen):
                     )
 
     def show_save_confirmation_dialog(self):
+        if self._submitting:
+            return
         logic = _logic()
 
         if logic.has_validation_errors():
@@ -281,6 +284,7 @@ class WorkoutScreen(MDScreen):
             return
 
         self.pending_workout_data = saved_exercises_data
+        self._submitting = True
 
         summary_data = logic.generate_workout_summary(self.pending_workout_data)
         final_text = ""
@@ -363,8 +367,10 @@ class WorkoutScreen(MDScreen):
             app.switch_to_screen("history")
         else:
             print("Нет данных для сохранения.")
+        self._submitting = False
 
     def close_dialog(self, *args):
         if self.dialog:
             self.dialog.dismiss()
             self.dialog = None
+        self._submitting = False

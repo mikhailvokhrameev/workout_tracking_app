@@ -39,6 +39,7 @@ class NewProgramDialog(MDDialog):
             "double": "двойная (3x8-10)",
         }
         self.selected_prog_type = "double"
+        self._creating = False
 
     def on_open(self):
         self.ids.progression_type_button_text.text = self.prog_map_display[self.selected_prog_type]
@@ -64,13 +65,19 @@ class NewProgramDialog(MDDialog):
         self.ids.progression_type_button_text.text = display_text
 
     def create_program(self, *args):
+        if self._creating:
+            return
         prog_name = self.ids.new_program_name_input.text.strip()
         if prog_name:
-            logic = _logic()
-            logic.create_new_program(prog_name, self.selected_prog_type)
+            self._creating = True
+            try:
+                logic = _logic()
+                logic.create_new_program(prog_name, self.selected_prog_type)
 
-            Clock.schedule_once(self.screen.populate_program_list)
-            self.dismiss()
+                Clock.schedule_once(self.screen.populate_program_list)
+                self.dismiss()
+            finally:
+                self._creating = False
 
 
 class ProgramsScreen(MDScreen):

@@ -19,6 +19,7 @@ class ExerciseItem(MDBoxLayout):
 class ProgramDetailScreen(MDScreen):
     program_id = ObjectProperty(None)
     exercises_cache = None
+    _mutating = False
 
     def on_enter(self, *args):
         if self.program_id:
@@ -67,24 +68,32 @@ class ProgramDetailScreen(MDScreen):
 
     def add_exercise(self):
         name = self.ids.new_exercise_name.text.strip()
-        if not name or len(name) > 30 or not self.program_id:
+        if self._mutating or not name or len(name) > 30 or not self.program_id:
             return
-        
-        logic = _logic()
-        logic.select_program(self.program_id)
-        logic.add_exercise_to_program(name)
 
-        self.ids.new_exercise_name.text = ""
-        self.load_program_data()
+        self._mutating = True
+        try:
+            logic = _logic()
+            logic.select_program(self.program_id)
+            logic.add_exercise_to_program(name)
+
+            self.ids.new_exercise_name.text = ""
+            self.load_program_data()
+        finally:
+            self._mutating = False
 
     def delete_exercise(self, exercise_id):
-        if not self.program_id or not exercise_id:
+        if self._mutating or not self.program_id or not exercise_id:
             return
 
-        logic = _logic()
-        logic.select_program(self.program_id)
-        logic.delete_exercise(exercise_id)
-        self.load_program_data()
+        self._mutating = True
+        try:
+            logic = _logic()
+            logic.select_program(self.program_id)
+            logic.delete_exercise(exercise_id)
+            self.load_program_data()
+        finally:
+            self._mutating = False
 
     def start_workout(self):
         if not self.program_id:
