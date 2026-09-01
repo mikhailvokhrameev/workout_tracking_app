@@ -39,10 +39,10 @@ class NewSetRow(MDBoxLayout):
     reps = StringProperty('')
     panel_ref = ObjectProperty(None)
     set_number = StringProperty('')
-    
+
     weight_error = BooleanProperty(False)
     reps_error = BooleanProperty(False)
-    
+
     def on_weight(self, instance, value):
         self._validate_and_update('weight', value)
 
@@ -66,19 +66,19 @@ class NewSetRow(MDBoxLayout):
             is_valid = False
 
         target_property = f"{property_name}_error"
-        
+
         setattr(self, target_property, False)
-        
+
         if not is_valid:
             Clock.schedule_once(lambda dt: setattr(self, target_property, True), 0)
-            
+
         logic = _logic()
         logic.update_set_error_state(self.exercise_id, self.set_id, property_name, not is_valid)
 
-    
+
 class TrailingPressedIconButton(ButtonBehavior, RotateBehavior, MDListItemTrailingIcon):
     pass
-    
+
 
 class ExpansionPanelItem(MDExpansionPanel):
     exercise_id = ObjectProperty(None)
@@ -87,7 +87,8 @@ class ExpansionPanelItem(MDExpansionPanel):
     last_workout_info = StringProperty("")
 
     def on_open(self, *args):
-        self.add_set_row()
+        if not self.ids.new_sets_container.children:
+            self.add_set_row()
 
     def add_set_row(self, set_data=None):
         logic = _logic()
@@ -121,10 +122,34 @@ class ExpansionPanelItem(MDExpansionPanel):
         )
         set_row.set_number = set_number
         self.ids.new_sets_container.add_widget(set_row)
+        Clock.schedule_once(self._sync_content_height, 0)
 
     def remove_set_row(self, set_row):
         _logic().delete_set_from_workout(set_row.exercise_id, set_row.set_id)
         self.ids.new_sets_container.remove_widget(set_row)
+        self._renumber_sets()
+        Clock.schedule_once(self._sync_content_height, 0)
+
+    def _sync_content_height(self, *args):
+        # NewSetRow widgets are added to new_sets_container, a child nested
+        # one level inside MDExpansionPanelContent — KivyMD's own
+        # MDExpansionPanelContent.add_widget only auto-refreshes
+        # _original_content_height for its DIRECT children, so additions to
+        # new_sets_container never trigger it. Without this, the panel keeps
+        # animating to a stale (too-small) height and new rows overflow past
+        # the box, overlapping whatever is below. Reuse KivyMD's own public
+        # recompute method, then live-sync if already open so the fix is
+        # visible immediately, not just on the next open().
+        self._update_original_content_height(self._content)
+        if self.is_open:
+            self._content.height = self._original_content_height
+
+    def _renumber_sets(self):
+        # Kivy stacks children in reverse insertion order, so reverse to get
+        # top-to-bottom visual order before relabeling.
+        rows = list(reversed(self.ids.new_sets_container.children))
+        for index, row in enumerate(rows):
+            row.set_number = str(index + 1)
 
 
 class WorkoutScreen(MDScreen):
@@ -151,7 +176,7 @@ class WorkoutScreen(MDScreen):
 
         snapshot = _session_snapshot()
         progression_type = active_program.get("progressionType", "double")
-        
+
         for ex in active_program["exercises"]:
             last_workout = logic.get_last_workout_for_exercise(ex['id'])
 
@@ -174,8 +199,8 @@ class WorkoutScreen(MDScreen):
                     target_text = f"Цель: {base_text}{w_text}"
                 else:
                     target_text = f"Цель: {base_text}"
-            
-            
+
+
             panel = ExpansionPanelItem(
                 exercise_id=ex["id"],
                 exercise_name=ex["name"],
