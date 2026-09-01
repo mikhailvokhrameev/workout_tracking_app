@@ -10,6 +10,12 @@ This repository contains an application designed to automate the process of plan
 
 ---
 
+## Stack
+
+`Python` · `Kivy` · `KivyMD` · `SQLite` · `kivy_garden.graph` · `Buildozer` · `pytest`
+
+---
+
 ### Why did I build this project?
 
 I wanted to understand the process of developing a full-featured application in `Python` and launching it on a mobile device.
@@ -43,6 +49,17 @@ The app implements **3 types of progressive overload**:
 - **kivymd 2.0.1.dev0**
 - **kivy-garden 0.1.5**
 - **kivy-garden-graph 0.4.1.dev0**
+- **sqlite3** (Python standard library) — ground-truth storage, see [Data layer](#data-layer) below
+
+---
+
+### Data layer
+
+App data (programs, exercises, workout history, progression targets) lives in a normalized **SQLite** database, not a JSON blob — `programs`, `exercises`, `workout_sessions`, `session_exercises`, and `sets` tables, plus an `app_meta` key/value table for settings and schema versioning. A repository layer (`ProgramRepository`, `WorkoutRepository`, `SettingsRepository`) owns all reads and writes, sharing a single connection; the service layer never touches SQL directly.
+
+On first launch after an upgrade from an older version, a one-time transactional migration imports the legacy `app_data.json` into the database and renames it to `app_data.json.bak` — safe to interrupt: if the app is killed mid-migration, the next launch retries cleanly instead of leaving partial data.
+
+This move away from a single JSON file was specifically to make the data queryable — the normalized schema is what future ML-driven features (progression trend analysis, plateau detection) will read from directly with SQL, instead of deserializing and looping over the whole history in Python.
 
 ---
 
@@ -62,8 +79,12 @@ workout_tracking_app/
 │   └── main_screen.kv --> organizing navigation across different app screens
 ├── logic/
 │   ├── components.py --> some UI components
-│   ├── storage.py --> reading/writing JSON, app data container
-│   ├── models.py --> typed models and helpers
+│   ├── schema.py --> SQLite schema (tables, indexes, schema_version)
+│   ├── database.py --> connection bootstrap: creates schema, runs migration
+│   ├── migration.py --> one-time transactional import from legacy app_data.json
+│   ├── repositories.py --> ProgramRepository, WorkoutRepository, SettingsRepository — all SQL lives here
+│   ├── dataclasses.py --> typed Program/Exercise/WorkoutSession/... records returned by the repositories
+│   ├── errors.py --> StorageWriteError + rollback-on-failure wrapper for writes
 │   ├── progression.py
 │   ├── services.py --> CRUD for program/exercise, saving/summary of workouts, history, charts
 │   ├── session_state.py
@@ -77,8 +98,10 @@ workout_tracking_app/
 │   ├── progressive_overload_screen.py
 │   ├── workout_screen.py
 │   └── main_screen.py --> organizing navigation across different app screens
+├── tests/ --> pytest suite: repository CRUD, migration, progression logic, error handling
 ├──   __init__.py
 ├──   main.py --> main file, launches the app
+├──   buildozer.spec --> Android packaging config
 ├──   .gitignore
 ├──   README.md
 └──   requirements.txt
@@ -123,4 +146,10 @@ To set up the project environment, follow these steps:
 
 ```bash
 python main.py
+```
+
+2. Run the test suite:
+
+```bash
+python -m pytest tests/
 ```
