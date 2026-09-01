@@ -99,6 +99,20 @@ class ExpansionPanelItem(MDExpansionPanel):
         # every panel is correct well before a human can plausibly tap it.
         Clock.schedule_once(self._sync_content_height, 0)
 
+    def _set_content_height(self, *args):
+        # Override KivyMD's own version (kivymd/uix/expansionpanel/
+        # expansionpanel.py), which unconditionally does
+        # `self._content.height = 0` here regardless of whether the panel
+        # has since been opened. That 0.8s callback still fires even if the
+        # user already expanded the panel well within that window (easy now
+        # that the whole cell is tappable) — forcibly zeroing an
+        # already-visible panel's height out from under it corrupts the
+        # layout: the header and the still-rendered-but-now-heightless
+        # content overlap. Delegate to our own sync, which only writes a
+        # live height when the panel is actually open, and never blindly
+        # collapses it.
+        self._sync_content_height(*args)
+
     def on_open(self, *args):
         if not self.ids.new_sets_container.children:
             self.add_set_row()
