@@ -68,6 +68,8 @@ class GraphScreen(MDScreen):
             caller=self.ids.program_dropdown_button,
             items=menu_items,
             width_mult=4,
+            max_height=dp(224),
+            position="bottom",
         )
 
         if self.selected_program_id is not None:
@@ -98,6 +100,8 @@ class GraphScreen(MDScreen):
             caller=self.ids.exercise_dropdown_button,
             items=menu_items,
             width_mult=4,
+            max_height=dp(224),
+            position="bottom",
         )
 
     def select_program(self, program_data: Dict[str, Any]):

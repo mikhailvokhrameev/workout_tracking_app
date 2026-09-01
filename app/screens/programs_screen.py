@@ -4,6 +4,7 @@ from kivymd.uix.screen import MDScreen
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.card import MDCard
 from kivymd.uix.menu import MDDropdownMenu
+from kivy.metrics import dp
 from kivy.properties import ObjectProperty, StringProperty
 from kivy.clock import Clock
 from kivymd.uix.label import MDLabel
@@ -22,7 +23,7 @@ class ProgramCard(MDCard):
         if self.program_id:
             logic = _logic()
             logic.select_program(self.program_id)
-            
+
             detail_screen = self.screen.manager.get_screen("program_detail")
             detail_screen.program_id = self.program_id
             self.screen.manager.transition.direction = "left"
@@ -54,6 +55,8 @@ class NewProgramDialog(MDDialog):
             caller=button,
             items=menu_items,
             width_mult=4,
+            max_height=dp(224),
+            position="bottom",
         ).open()
 
     def set_item(self, value, display_text):
@@ -65,7 +68,7 @@ class NewProgramDialog(MDDialog):
         if prog_name:
             logic = _logic()
             logic.create_new_program(prog_name, self.selected_prog_type)
-            
+
             Clock.schedule_once(self.screen.populate_program_list)
             self.dismiss()
 
@@ -80,7 +83,7 @@ class ProgramsScreen(MDScreen):
         if program_id:
             logic = _logic()
             logic.select_program(program_id)
-            
+
             detail_screen = self.manager.get_screen("program_detail")
             detail_screen.program_id = program_id
             self.manager.transition.direction = "left"
@@ -89,7 +92,7 @@ class ProgramsScreen(MDScreen):
     def populate_program_list(self, *args):
         container = self.ids.program_list
         container.clear_widgets()
-        
+
         logic = _logic()
 
         try:
