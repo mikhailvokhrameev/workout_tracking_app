@@ -100,6 +100,14 @@ class MainApp(MDApp):
             panel.close()
             panel.set_chevron_up(chevron)
         else:
+            if panel._content.parent is not None:
+                # MDExpansionPanel.close() flips is_open to False partway
+                # through its close animation, before the content widget is
+                # actually detached. A fast re-tap in that window would call
+                # open() -> add_widget() on a still-parented widget and crash
+                # with "already has a parent". Ignore the tap until the close
+                # animation genuinely finishes removing the content.
+                return
             panel.open()
             panel.set_chevron_down(chevron)
 
