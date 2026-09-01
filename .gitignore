@@ -33,6 +33,8 @@ MANIFEST
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
+# ...except buildozer's own spec — it must be committed for CI to build.
+!buildozer.spec
 
 # Installer logs
 pip-log.txt
