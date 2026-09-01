@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivy.properties import ObjectProperty
 
