@@ -68,6 +68,7 @@
     MDExpansionPanelHeader:
         MDListItem:
             ripple_effect: False
+            on_release: app.tap_expansion_chevron(root, chevron)
 
             MDListItemHeadlineText:
                 text: root.exercise_name
