@@ -1,5 +1,25 @@
-Python==3.12.4
+# Python itself (3.12.4) is a runtime requirement, not a pip package — see the
+# README's Installation section. It used to be listed here as "Python==3.12.4",
+# which made `pip install -r requirements.txt` fail on its very first line.
+
 Kivy==2.3.1
-kivymd==2.0.1.dev0
 kivy-garden==0.1.5
-kivy-garden-graph==0.4.1.dev0
+
+# KivyMD and kivy_garden.graph are NOT installable from PyPI at the versions
+# this app needs: both report ".dev0" versions that exist only on their git
+# master branches (PyPI has kivymd 2.0.0 and kivy_garden.graph 0.4.0). They are
+# therefore installed from git, pinned to exact commits.
+#
+# The pins are load-bearing, not tidiness. KivyMD master later began importing
+# materialyoucolor.dynamiccolor.color_spec, which materialyoucolor 2.0.10 does
+# not provide. Because "2.0.1.dev0" names a whole year of master commits,
+# tracking master silently produced an Android build that compiled fine and
+# then died at startup with ModuleNotFoundError. buildozer.spec pins KivyMD to
+# this same commit; keep the two in sync.
+kivymd @ git+https://github.com/kivymd/KivyMD@95184d98c6215a3f5cc0821708628963b654a59e
+kivy_garden.graph @ git+https://github.com/kivy-garden/graph@27c93e044cdae041c3fd1c98548bce7494f61e9e
+
+# Pulled in by KivyMD. Pinned explicitly so the desktop environment matches what
+# python-for-android's recipe builds into the APK; 3.x is NOT compatible with
+# the KivyMD commit above.
+materialyoucolor==2.0.10
