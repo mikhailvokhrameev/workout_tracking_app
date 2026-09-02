@@ -159,3 +159,47 @@ jobs:
             bin/*.apk
             bin/*.aab
           retention-days: 3
+
+      # --- Runtime smoke test -------------------------------------------
+      # The build succeeding says nothing about whether the app actually
+      # runs: it was dying on the presplash with no Android-level crash
+      # event (a clean Python-side exit is not a Java crash/ANR), so
+      # Firebase Test Lab reported "no crashes" while the app never
+      # started. Boot an emulator, launch the app, and dump the Python
+      # log so startup failures are visible in CI instead of needing a
+      # physical device.
+      - name: Enable KVM for the emulator
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Launch app on emulator and capture Python log
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          profile: pixel_6
+          disable-animations: true
+          script: |
+            set -x
+            adb install -r bin/*.apk
+            adb logcat -c
+            adb shell am start -n org.wtracker.wtrackerApk/org.kivy.android.PythonActivity
+            # Give Python time to boot, import, and fail.
+            sleep 45
+
+            echo "===================== PYTHON LOG ====================="
+            # p4a tags all Python output (including tracebacks) as "python".
+            adb logcat -d -s python:V || true
+            echo "===================== FATAL / CRASH ================="
+            adb logcat -d *:E | grep -iE "AndroidRuntime|python|wtracker" || true
+            echo "===================== PROCESS STATE ================="
+            # If the process is gone, it died during startup.
+            adb shell ps -A | grep -i wtracker || echo "PROCESS NOT RUNNING (died during startup)"
+            echo "====================================================="
+        # Never fail the build on this: a crashing app is exactly what we
+        # are trying to observe, and the log above is the deliverable.
+        continue-on-error: true
