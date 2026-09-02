@@ -9,6 +9,10 @@ on:
   pull_request:
     branches:
       - main
+  # Allows building any branch on demand from the Actions tab or
+  # `gh workflow run "Android Build" --ref <branch>`, without needing an
+  # open PR or a push to main.
+  workflow_dispatch:
 
 jobs:
   build:
