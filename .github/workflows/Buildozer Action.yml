@@ -17,6 +17,29 @@ on:
 jobs:
   build:
     runs-on: ubuntu-22.04
+    name: build (${{ matrix.name }})
+
+    # Two single-arch builds instead of one dual-arch build. Each extra arch
+    # duplicates the entire native payload, so building arm64-v8a + x86_64
+    # together produced a ~53MB APK where ~27MB of it was x86_64 libs that no
+    # phone can use. Splitting keeps the shipped artifact arm64-only (~26MB)
+    # while CI still gets an x86_64 APK it can install on the emulator.
+    # The two run in parallel, so wall-clock is roughly unchanged and total
+    # build minutes are about what the single dual-arch build already cost.
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Shipped artifact: real devices are arm64.
+          - name: arm64-v8a
+            profile: ''
+            upload: true
+            smoke: false
+          # Test-only: x86_64 so it installs on the GitHub-hosted emulator.
+          - name: x86_64
+            profile: '--profile ci'
+            upload: false
+            smoke: true
 
     steps:
       - uses: actions/checkout@v4
@@ -49,9 +72,9 @@ jobs:
           # after the bump). restore-keys still allows a same-spec run to
           # partially reuse the previous cache; a spec change gets a full
           # cache miss and a clean rebuild against the new settings.
-          key: ${{ runner.os }}-buildozer-app-${{ hashFiles('buildozer.spec') }}
+          key: ${{ runner.os }}-buildozer-app-${{ matrix.name }}-${{ hashFiles('buildozer.spec') }}
           restore-keys: |
-            ${{ runner.os }}-buildozer-app-
+            ${{ runner.os }}-buildozer-app-${{ matrix.name }}-
 
       - name: Cache Android SDK
         uses: actions/cache@v4
@@ -146,12 +169,13 @@ jobs:
       - name: Build with Buildozer
         id: buildozer
         run: |
-          yes | buildozer -v android debug
+          yes | buildozer -v ${{ matrix.profile }} android debug
         # yes | buildozer -v android release
         # run this for generating aab (Android App Bundle) [Required by google play]
 
       # Upload artifacts
       - name: Upload APK artifact
+        if: matrix.upload
         uses: actions/upload-artifact@v4
         with:
           name: package
@@ -169,6 +193,7 @@ jobs:
       # log so startup failures are visible in CI instead of needing a
       # physical device.
       - name: Enable KVM for the emulator
+        if: matrix.smoke
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
             | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -176,6 +201,7 @@ jobs:
           sudo udevadm trigger --name-match=kvm
 
       - name: Launch app on emulator and capture Python log
+        if: matrix.smoke
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34

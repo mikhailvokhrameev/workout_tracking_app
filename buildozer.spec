@@ -311,10 +311,13 @@ android.enable_androidx = True
 # (list) The Android archs to build for, choices: armeabi-v7a, arm64-v8a, x86, x86_64
 # In past, was `android.arch` as we weren't supporting builds for multiple archs at the same time.
 # android.archs = arm64-v8a, armeabi-v7a
-# x86_64 is here so CI can install the APK on a GitHub-hosted emulator
-# (runners are x86_64; an arm64-only APK fails to install with
-# INSTALL_FAILED_NO_MATCHING_ABIS). arm64-v8a is what real devices use.
-android.archs = arm64-v8a, x86_64
+# Ship arm64-v8a only: every extra arch duplicates the whole native payload
+# (libpybundle.so alone is ~16MB per arch), so adding x86_64 here doubled the
+# APK from ~26MB to ~53MB for users who can never run those libs.
+# CI still needs x86_64 to install on a GitHub-hosted emulator (runners are
+# x86_64; an arm64-only APK fails with INSTALL_FAILED_NO_MATCHING_ABIS), so
+# that lives in the [app@ci] profile at the bottom of this file instead.
+android.archs = arm64-v8a
 
 # (int) overrides automatic versionCode computation (used in build.gradle)
 # this is not the same as app version and should only be edited if you know what you're doing
@@ -481,3 +484,13 @@ warn_on_root = 1
 #    Then, invoke the command line with the "demo" profile:
 #
 #buildozer --profile demo android debug
+
+# Profile used only by the CI emulator smoke test:
+#   buildozer --profile ci android debug
+# Builds x86_64 instead of arm64-v8a so the APK installs on the GitHub-hosted
+# emulator. Startup failures are ABI-independent (the KivyMD/materialyoucolor
+# import crash reproduced identically on x86_64 and on an arm64 phone), so
+# smoke-testing this arch still exercises the thing we care about. The APK
+# built under this profile is a test artifact and is never shipped.
+[app@ci]
+android.archs = x86_64
