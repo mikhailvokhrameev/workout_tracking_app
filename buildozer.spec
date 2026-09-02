@@ -39,7 +39,19 @@ version = 0.1
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3, sqlite3, kivy==2.3.1,kivy_garden==0.1.5,kivy_garden.graph, git+https://github.com/kivymd/KivyMD@master, exceptiongroup, asynckivy, asyncgui, materialyoucolor, android
+# NOTE: do NOT add sqlite3 here. p4a's python3 recipe already depends on
+# sqlite3 and builds _sqlite3 into CPython. Listing it explicitly can push
+# the sqlite3 recipe to build AFTER python3 instead of before, so CPython
+# ends up without _sqlite3 — the build still succeeds, then `import sqlite3`
+# fails at runtime and the app dies right after the presplash.
+# See kivy/python-for-android#1053.
+# NOTE: KivyMD is pinned to an exact commit, NOT @master. KivyMD master moved on
+# to a materialyoucolor that provides `dynamiccolor.color_spec`, but p4a's
+# materialyoucolor recipe is hard-pinned to 2.0.10, which does not have it. The
+# build still succeeds, then kivymd/theming.py raises ModuleNotFoundError at
+# import time and the app dies right after the presplash.
+# Unpin only together with a materialyoucolor recipe that ships color_spec.
+requirements = python3, kivy==2.3.1,kivy_garden==0.1.5,kivy_garden.graph, git+https://github.com/kivymd/KivyMD@95184d98c6215a3f5cc0821708628963b654a59e, exceptiongroup, asynckivy, asyncgui, materialyoucolor, android
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -299,6 +311,12 @@ android.enable_androidx = True
 # (list) The Android archs to build for, choices: armeabi-v7a, arm64-v8a, x86, x86_64
 # In past, was `android.arch` as we weren't supporting builds for multiple archs at the same time.
 # android.archs = arm64-v8a, armeabi-v7a
+# Ship arm64-v8a only: every extra arch duplicates the whole native payload
+# (libpybundle.so alone is ~16MB per arch), so adding x86_64 here doubled the
+# APK from ~26MB to ~53MB for users who can never run those libs.
+# CI still needs x86_64 to install on a GitHub-hosted emulator (runners are
+# x86_64; an arm64-only APK fails with INSTALL_FAILED_NO_MATCHING_ABIS), so
+# that lives in the [app@ci] profile at the bottom of this file instead.
 android.archs = arm64-v8a
 
 # (int) overrides automatic versionCode computation (used in build.gradle)
@@ -466,3 +484,13 @@ warn_on_root = 1
 #    Then, invoke the command line with the "demo" profile:
 #
 #buildozer --profile demo android debug
+
+# Profile used only by the CI emulator smoke test:
+#   buildozer --profile ci android debug
+# Builds x86_64 instead of arm64-v8a so the APK installs on the GitHub-hosted
+# emulator. Startup failures are ABI-independent (the KivyMD/materialyoucolor
+# import crash reproduced identically on x86_64 and on an arm64 phone), so
+# smoke-testing this arch still exercises the thing we care about. The APK
+# built under this profile is a test artifact and is never shipped.
+[app@ci]
+android.archs = x86_64

@@ -9,10 +9,37 @@ on:
   pull_request:
     branches:
       - main
+  # Allows building any branch on demand from the Actions tab or
+  # `gh workflow run "Android Build" --ref <branch>`, without needing an
+  # open PR or a push to main.
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-22.04
+    name: build (${{ matrix.name }})
+
+    # Two single-arch builds instead of one dual-arch build. Each extra arch
+    # duplicates the entire native payload, so building arm64-v8a + x86_64
+    # together produced a ~53MB APK where ~27MB of it was x86_64 libs that no
+    # phone can use. Splitting keeps the shipped artifact arm64-only (~26MB)
+    # while CI still gets an x86_64 APK it can install on the emulator.
+    # The two run in parallel, so wall-clock is roughly unchanged and total
+    # build minutes are about what the single dual-arch build already cost.
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Shipped artifact: real devices are arm64.
+          - name: arm64-v8a
+            profile: ''
+            upload: true
+            smoke: false
+          # Test-only: x86_64 so it installs on the GitHub-hosted emulator.
+          - name: x86_64
+            profile: '--profile ci'
+            upload: false
+            smoke: true
 
     steps:
       - uses: actions/checkout@v4
@@ -45,9 +72,9 @@ jobs:
           # after the bump). restore-keys still allows a same-spec run to
           # partially reuse the previous cache; a spec change gets a full
           # cache miss and a clean rebuild against the new settings.
-          key: ${{ runner.os }}-buildozer-app-${{ hashFiles('buildozer.spec') }}
+          key: ${{ runner.os }}-buildozer-app-${{ matrix.name }}-${{ hashFiles('buildozer.spec') }}
           restore-keys: |
-            ${{ runner.os }}-buildozer-app-
+            ${{ runner.os }}-buildozer-app-${{ matrix.name }}-
 
       - name: Cache Android SDK
         uses: actions/cache@v4
@@ -142,12 +169,13 @@ jobs:
       - name: Build with Buildozer
         id: buildozer
         run: |
-          yes | buildozer -v android debug
+          yes | buildozer -v ${{ matrix.profile }} android debug
         # yes | buildozer -v android release
         # run this for generating aab (Android App Bundle) [Required by google play]
 
       # Upload artifacts
       - name: Upload APK artifact
+        if: matrix.upload
         uses: actions/upload-artifact@v4
         with:
           name: package
@@ -155,3 +183,33 @@ jobs:
             bin/*.apk
             bin/*.aab
           retention-days: 3
+
+      # --- Runtime smoke test -------------------------------------------
+      # The build succeeding says nothing about whether the app actually
+      # runs: it was dying on the presplash with no Android-level crash
+      # event (a clean Python-side exit is not a Java crash/ANR), so
+      # Firebase Test Lab reported "no crashes" while the app never
+      # started. Boot an emulator, launch the app, and dump the Python
+      # log so startup failures are visible in CI instead of needing a
+      # physical device.
+      - name: Enable KVM for the emulator
+        if: matrix.smoke
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Launch app on emulator and capture Python log
+        if: matrix.smoke
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          profile: pixel_6
+          disable-animations: true
+          script: bash ci/smoke_test.sh
+        # Never fail the build on this: a crashing app is exactly what we
+        # are trying to observe, and the log above is the deliverable.
+        continue-on-error: true

@@ -44,12 +44,17 @@ The app implements **3 types of progressive overload**:
 
 ### Dependencies:
 
-- **Python 3.12.4**
+- **Python 3.12.4** — the interpreter, installed separately (not via `pip`)
 - **Kivy 2.3.1**
-- **kivymd 2.0.1.dev0**
+- **KivyMD 2.0.1.dev0** — pinned to commit [`95184d9`](https://github.com/kivymd/KivyMD/tree/95184d98c6215a3f5cc0821708628963b654a59e)
 - **kivy-garden 0.1.5**
-- **kivy-garden-graph 0.4.1.dev0**
+- **kivy_garden.graph 0.4.1.dev0** — pinned to commit [`27c93e0`](https://github.com/kivy-garden/graph/tree/27c93e044cdae041c3fd1c98548bce7494f61e9e)
+- **materialyoucolor 2.0.10** — pulled in by KivyMD, pinned deliberately (see below)
 - **sqlite3** (Python standard library) — ground-truth storage, see [Data layer](#data-layer) below
+
+KivyMD and `kivy_garden.graph` are installed **from git at exact commits**, because neither is on PyPI at the version this app needs — both report `.dev0` versions that exist only on their master branches.
+
+Those pins are load-bearing rather than housekeeping. `2.0.1.dev0` is the version string KivyMD master has carried for over a year, so it identifies nothing: KivyMD master later started importing `materialyoucolor.dynamiccolor.color_spec`, which materialyoucolor 2.0.10 does not provide. Tracking master produced an Android build that compiled cleanly and then died at startup with `ModuleNotFoundError`. `buildozer.spec` pins KivyMD to the same commit — **keep the two in sync**.
 
 ---
 
@@ -99,6 +104,10 @@ workout_tracking_app/
 │   ├── workout_screen.py
 │   └── main_screen.py --> organizing navigation across different app screens
 ├── tests/ --> pytest suite: repository CRUD, migration, progression logic, error handling
+├── ci/
+│   └── smoke_test.sh --> boots the app on a CI emulator and dumps the Python log
+├── .github/workflows/
+│   └── Buildozer Action.yml --> Android build matrix + emulator smoke test
 ├──   __init__.py
 ├──   main.py --> main file, launches the app
 ├──   buildozer.spec --> Android packaging config
@@ -153,3 +162,43 @@ python main.py
 ```bash
 python -m pytest tests/
 ```
+
+---
+
+### Android build
+
+The APK is built with **Buildozer** / python-for-android, configured in `buildozer.spec`.
+
+```bash
+# Debug APK for a real device (arm64-v8a) -> bin/wtrackerApk-0.1-arm64-v8a-debug.apk
+buildozer -v android debug
+
+# x86_64 build, used only for testing on an emulator
+buildozer -v --profile ci android debug
+```
+
+**Architectures.** Only `arm64-v8a` is shipped. Every additional arch duplicates the entire native payload — `libpybundle.so` alone is ~16 MB per arch — so building `arm64-v8a` and `x86_64` together produced a 53 MB APK of which roughly half was libraries no phone could execute. Restricting to `arm64-v8a` puts the debug APK at ~26 MB.
+
+x86_64 is still needed to install on a GitHub-hosted emulator, so it lives in a separate `[app@ci]` profile at the bottom of `buildozer.spec` rather than in the shipped configuration.
+
+**`minapi` is 24, not 23.** CPython's `remote_debugging.c` uses `preadv`/`pwritev`, which the NDK only declares from API 24; on 23 the build fails to compile.
+
+### Continuous integration
+
+`.github/workflows/Buildozer Action.yml` runs on pushes and PRs to `main`, and on demand via `workflow_dispatch` for any branch. It builds two legs in parallel:
+
+| Leg | Arch | Purpose |
+|---|---|---|
+| `build (arm64-v8a)` | arm64-v8a | Produces the uploaded APK artifact |
+| `build (x86_64)` | x86_64 | Boots an emulator and runs the runtime smoke test |
+
+**Why a smoke test.** A green build says nothing about whether the app actually runs. The app once built successfully and then died on the presplash on every launch — and because python-for-android exits the process cleanly when Python raises during startup, that is not a Java crash or an ANR, so Firebase Test Lab reported *"no crashes"* while the app had never started. `ci/smoke_test.sh` installs the APK, launches it through the LAUNCHER intent, and dumps `logcat -s python`, making startup tracebacks visible in CI without a physical device. A healthy run reaches:
+
+```
+[INFO] [Base] Start application main loop
+PROCESS IS RUNNING (app survived startup)
+```
+
+The smoke test never fails the build on a crashing app — the captured log is the deliverable.
+
+**Caching.** The `.buildozer` cache key includes a hash of `buildozer.spec` and the matrix leg name. Both matter: a static key once restored p4a's per-target build tree even after `android.minapi` changed, silently rebuilding against the old target, and an unscoped key would let one arch's leg save a cache the other then restores without its own build tree.
