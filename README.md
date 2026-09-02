@@ -29,7 +29,7 @@ It is a fundamental principle of strength training that involves gradually incre
 
 **The main goal** is to avoid training plateaus. If you perform the same exercises with the same weight and reps, the body quickly adapts, and progress stops. Progression forces the muscles to work harder, stimulating hypertrophy and strength gains.
 
-The app implements **3 types of progressive overload**:
+The app implements **2 types of progressive overload**:
 * Double Progression
 * Linear Progression
 
@@ -44,27 +44,22 @@ The app implements **3 types of progressive overload**:
 
 ### Dependencies:
 
-- **Python 3.12.4** — the interpreter, installed separately (not via `pip`)
+- **Python 3.12.4**
 - **Kivy 2.3.1**
-- **KivyMD 2.0.1.dev0** — pinned to commit [`95184d9`](https://github.com/kivymd/KivyMD/tree/95184d98c6215a3f5cc0821708628963b654a59e)
+- **KivyMD 2.0.1.dev0**
 - **kivy-garden 0.1.5**
-- **kivy_garden.graph 0.4.1.dev0** — pinned to commit [`27c93e0`](https://github.com/kivy-garden/graph/tree/27c93e044cdae041c3fd1c98548bce7494f61e9e)
-- **materialyoucolor 2.0.10** — pulled in by KivyMD, pinned deliberately (see below)
-- **sqlite3** (Python standard library) — ground-truth storage, see [Data layer](#data-layer) below
-
-KivyMD and `kivy_garden.graph` are installed **from git at exact commits**, because neither is on PyPI at the version this app needs — both report `.dev0` versions that exist only on their master branches.
-
-Those pins are load-bearing rather than housekeeping. `2.0.1.dev0` is the version string KivyMD master has carried for over a year, so it identifies nothing: KivyMD master later started importing `materialyoucolor.dynamiccolor.color_spec`, which materialyoucolor 2.0.10 does not provide. Tracking master produced an Android build that compiled cleanly and then died at startup with `ModuleNotFoundError`. `buildozer.spec` pins KivyMD to the same commit — **keep the two in sync**.
+- **kivy_garden.graph 0.4.1.dev0**
+- **materialyoucolor 2.0.10** — pulled in by KivyMD, pinned deliberately
+- **sqlite3** (Python standard library) — ground-truth storage
 
 ---
 
 ### Data layer
 
-App data (programs, exercises, workout history, progression targets) lives in a normalized **SQLite** database, not a JSON blob — `programs`, `exercises`, `workout_sessions`, `session_exercises`, and `sets` tables, plus an `app_meta` key/value table for settings and schema versioning. A repository layer (`ProgramRepository`, `WorkoutRepository`, `SettingsRepository`) owns all reads and writes, sharing a single connection; the service layer never touches SQL directly.
+The app uses a normalized **SQLite** database (`programs`, `exercises`, `workout_sessions`, `session_exercises`, `sets`, and `app_meta`) managed through a repository layer (`ProgramRepository`, `WorkoutRepository`, `SettingsRepository`) using a shared connection.
 
-On first launch after an upgrade from an older version, a one-time transactional migration imports the legacy `app_data.json` into the database and renames it to `app_data.json.bak` — safe to interrupt: if the app is killed mid-migration, the next launch retries cleanly instead of leaving partial data.
-
-This move away from a single JSON file was specifically to make the data queryable — the normalized schema is what future ML-driven features (progression trend analysis, plateau detection) will read from directly with SQL, instead of deserializing and looping over the whole history in Python.
+* **Legacy Migration:** On first launch after an upgrade, a transactional migration imports existing data from `app_data.json` into the database and renames the file to `app_data.json.bak`. The migration is fully idempotent and safe to interrupt.
+* **Architecture:** The normalized schema replaces unstructured JSON storage to enable efficient SQL-based queries for future features like progression trend analysis and plateau detection.
 
 ---
 
@@ -165,40 +160,36 @@ python -m pytest tests/
 
 ---
 
-### Android build
+### Android Build & CI
 
-The APK is built with **Buildozer** / python-for-android, configured in `buildozer.spec`.
+The app is built using **Buildozer** / **python-for-android**.
 
+#### Build Commands
 ```bash
-# Debug APK for a real device (arm64-v8a) -> bin/wtrackerApk-0.1-arm64-v8a-debug.apk
+# Debug APK for physical devices (arm64-v8a)
 buildozer -v android debug
 
-# x86_64 build, used only for testing on an emulator
+# x86_64 build for local / emulator testing
 buildozer -v --profile ci android debug
+
 ```
 
-**Architectures.** Only `arm64-v8a` is shipped. Every additional arch duplicates the entire native payload — `libpybundle.so` alone is ~16 MB per arch — so building `arm64-v8a` and `x86_64` together produced a 53 MB APK of which roughly half was libraries no phone could execute. Restricting to `arm64-v8a` puts the debug APK at ~26 MB.
+#### Build Specifications
 
-x86_64 is still needed to install on a GitHub-hosted emulator, so it lives in a separate `[app@ci]` profile at the bottom of `buildozer.spec` rather than in the shipped configuration.
+* **Target Architecture:** `arm64-v8a` (keeps the APK size at ~26 MB).
+* **Emulator Profile:** `[app@ci]` profile builds `x86_64` for GitHub-hosted emulator testing.
+* **Min API:** `24` (required by CPython's `remote_debugging.c`).
 
-**`minapi` is 24, not 23.** CPython's `remote_debugging.c` uses `preadv`/`pwritev`, which the NDK only declares from API 24; on 23 the build fails to compile.
+#### Continuous Integration (`.github/workflows/Buildozer Action.yml`)
 
-### Continuous integration
+Runs on pushes/PRs to `main` with two parallel jobs:
 
-`.github/workflows/Buildozer Action.yml` runs on pushes and PRs to `main`, and on demand via `workflow_dispatch` for any branch. It builds two legs in parallel:
-
-| Leg | Arch | Purpose |
-|---|---|---|
-| `build (arm64-v8a)` | arm64-v8a | Produces the uploaded APK artifact |
-| `build (x86_64)` | x86_64 | Boots an emulator and runs the runtime smoke test |
-
-**Why a smoke test.** A green build says nothing about whether the app actually runs. The app once built successfully and then died on the presplash on every launch — and because python-for-android exits the process cleanly when Python raises during startup, that is not a Java crash or an ANR, so Firebase Test Lab reported *"no crashes"* while the app had never started. `ci/smoke_test.sh` installs the APK, launches it through the LAUNCHER intent, and dumps `logcat -s python`, making startup tracebacks visible in CI without a physical device. A healthy run reaches:
-
+1. **`build (arm64-v8a)`:** Builds and uploads the standard APK artifact.
+2. **`build (x86_64)`:** Boots an emulator and runs `ci/smoke_test.sh` to capture `logcat -s python` and verify startup logs:
 ```
 [INFO] [Base] Start application main loop
 PROCESS IS RUNNING (app survived startup)
+
 ```
 
-The smoke test never fails the build on a crashing app — the captured log is the deliverable.
-
-**Caching.** The `.buildozer` cache key includes a hash of `buildozer.spec` and the matrix leg name. Both matter: a static key once restored p4a's per-target build tree even after `android.minapi` changed, silently rebuilding against the old target, and an unscoped key would let one arch's leg save a cache the other then restores without its own build tree.
+* **Caching:** The `.buildozer` cache key is scoped by `buildozer.spec` hash and matrix leg name.
