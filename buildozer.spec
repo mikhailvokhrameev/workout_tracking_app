@@ -45,7 +45,13 @@ version = 0.1
 # ends up without _sqlite3 — the build still succeeds, then `import sqlite3`
 # fails at runtime and the app dies right after the presplash.
 # See kivy/python-for-android#1053.
-requirements = python3, kivy==2.3.1,kivy_garden==0.1.5,kivy_garden.graph, git+https://github.com/kivymd/KivyMD@master, exceptiongroup, asynckivy, asyncgui, materialyoucolor, android
+# NOTE: KivyMD is pinned to an exact commit, NOT @master. KivyMD master moved on
+# to a materialyoucolor that provides `dynamiccolor.color_spec`, but p4a's
+# materialyoucolor recipe is hard-pinned to 2.0.10, which does not have it. The
+# build still succeeds, then kivymd/theming.py raises ModuleNotFoundError at
+# import time and the app dies right after the presplash.
+# Unpin only together with a materialyoucolor recipe that ships color_spec.
+requirements = python3, kivy==2.3.1,kivy_garden==0.1.5,kivy_garden.graph, git+https://github.com/kivymd/KivyMD@95184d98c6215a3f5cc0821708628963b654a59e, exceptiongroup, asynckivy, asyncgui, materialyoucolor, android
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
