@@ -39,7 +39,13 @@ version = 0.1
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3, sqlite3, kivy==2.3.1,kivy_garden==0.1.5,kivy_garden.graph, git+https://github.com/kivymd/KivyMD@master, exceptiongroup, asynckivy, asyncgui, materialyoucolor, android
+# NOTE: do NOT add sqlite3 here. p4a's python3 recipe already depends on
+# sqlite3 and builds _sqlite3 into CPython. Listing it explicitly can push
+# the sqlite3 recipe to build AFTER python3 instead of before, so CPython
+# ends up without _sqlite3 — the build still succeeds, then `import sqlite3`
+# fails at runtime and the app dies right after the presplash.
+# See kivy/python-for-android#1053.
+requirements = python3, kivy==2.3.1,kivy_garden==0.1.5,kivy_garden.graph, git+https://github.com/kivymd/KivyMD@master, exceptiongroup, asynckivy, asyncgui, materialyoucolor, android
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
