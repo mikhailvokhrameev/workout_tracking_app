@@ -183,41 +183,7 @@ jobs:
           target: google_apis
           profile: pixel_6
           disable-animations: true
-          script: |
-            adb install -r bin/*.apk
-
-            # Discover the package rather than hardcoding it: buildozer can
-            # transform package.name, and the activity class differs between
-            # p4a bootstraps/branches. Guessing it wrong silently launches
-            # nothing and yields an empty log that looks like a crash.
-            PKG=$(adb shell pm list packages | tr -d '\r' | sed 's/^package://' | grep -i wtracker | head -1)
-            echo "RESOLVED PACKAGE: ${PKG:-<none found>}"
-            if [ -z "$PKG" ]; then
-              echo "APK installed but no matching package found — listing all third-party packages:"
-              adb shell pm list packages -3
-              exit 1
-            fi
-            echo "RESOLVED LAUNCH ACTIVITY:"
-            adb shell cmd package resolve-activity --brief "$PKG" | tail -1
-
-            adb logcat -c
-            # monkey with the LAUNCHER category starts whatever the manifest
-            # declares as the entry activity, so no class name is needed.
-            adb shell monkey -p "$PKG" -c android.intent.category.LAUNCHER 1
-            # Give Python time to boot, import, and fail.
-            sleep 45
-
-            echo "===================== PYTHON LOG ====================="
-            # p4a tags Python output (tracebacks included) as "python".
-            adb logcat -d -s python:V || true
-            echo "================== BROAD PATTERN GREP ==============="
-            # Fallback in case the tag differs: search the whole buffer.
-            adb logcat -d 2>/dev/null \
-              | grep -iE "traceback|modulenotfound|importerror|no module|python|wtracker|AndroidRuntime" \
-              | tail -120 || true
-            echo "===================== PROCESS STATE ================="
-            adb shell ps -A | grep -i wtracker || echo "PROCESS NOT RUNNING (died during startup)"
-            echo "====================================================="
+          script: bash ci/smoke_test.sh
         # Never fail the build on this: a crashing app is exactly what we
         # are trying to observe, and the log above is the deliverable.
         continue-on-error: true
